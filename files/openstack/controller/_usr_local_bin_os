@@ -1,0 +1,160 @@
+#!/bin/bash
+dbuser=report
+dbpass=report@1234
+dbhost=db1
+
+. /root/openrc Jio
+
+### Deaults
+flavor=${OS_TEST_FLAVOR:-"m1.small"}
+image=${OS_TEST_IMAGE:-"9f84e02c-e08d-406e-88e7-12f8c4380624"}
+network=${OS_TEST_NETWORK:-"9c06a69a-0942-497b-860c-09c62cfe389c"}
+tenant=${OS_TEST_TENANT:-"$OS_TENANT"}
+
+
+#### Defaults end
+
+
+dbcmd="mysql -u$dbuser -p$dbpass -h$dbhost"
+
+instance-list-on-compute-node() { 
+   $dbcmd -e "select i.uuid, i.project_id Tenant_ID,p.name tenant_name, i.node from nova.instances i , keystone.project p where node='$1' and i.deleted=0 and i.project_id=p.id;"
+}
+
+
+
+instance-list-all() {
+   $dbcmd -e "select i.uuid, i.project_id Tenant_ID,p.name tenant_name, i.node from nova.instances i , keystone.project p where i.project_id=p.id and deleted=0"
+}
+
+instance-rm-all() {
+IFS=$'\n'; 
+for i in `os instance-list-all | sed 's/\t/,/g' | grep -v Tenant_ID`; do 
+        tenant="`echo $i | cut -f3 -d,`"; 
+        id="`echo $i | cut -f1 -d,`"; 
+        node="`echo $i | cut -f4 -d,`"; 
+        echo "`date` Deleting instance $id of Tenant $tenant on Node $node" ; 
+	keystone user-role-add --tenant $tenant --role admin --user admin 2> /dev/null
+        export OS_TENANT_NAME=$tenant; 
+        nova delete $id ; 
+done; 
+unset IFS
+
+}
+
+instance-rm-all-on-compute-node() {
+IFS=$'\n'; 
+for i in `os instance-list-on-compute-node $1 | sed 's/\t/,/g' | grep -v Tenant_ID`; do 
+	tenant="`echo $i | cut -f3 -d,`"; 
+	id="`echo $i | cut -f1 -d,`"; 
+	echo "`date` Deleting instance $id of Tenant $tenant" ; 
+	export OS_TENANT_NAME=$tenant; 
+	nova delete $id ; 
+done; 
+unset IFS
+}
+
+instance-boot-on-all-compute-nodes() {
+  tenant=${OS_TEST_TENANT:-"$OS_TENANT"}
+   net_id=`echo $2 | cut -f2 -d=`
+  printf "`date` Booting VMs with the details - Flavor: $flavor, Image: $image, Network: $net_id,\nAre you sure to continue? [y/n] [n] "
+  read sure
+  if [ `echo $sure | grep -ic "^ *[y] *$"` -eq 0 ]; then 
+	exit 1;
+  fi
+  for i in `os compute-node-list`; do
+     echo "Booting vm on $i (${1}-${i})"
+     nova boot --flavor $flavor --image $image --nic net-id=$net_id --availability-zone nova:$i ${1}-${i}  
+  done  
+}
+
+compute-node-list() {
+	. /root/openrc
+	nova availability-zone-list  | awk '/cp/ {print $3}'
+}
+
+contrail-list-stale-vms() {
+num_stale_vms=0
+for i in `curl -i http://ct1:8082/virtual-machines 2>&1 | awk '/virtual-machines/ { for (i=1;i<=NF; ++i) { if ($i ~ /http/) {gsub(/[\",]/,"",$i); print $i}}}' | sed 's#.*/\([a-z0-9\-]*\)$#\1#i'`;do 
+	os_list=`os instance-list-all | awk '{printf $1","}'`;
+	if [ `echo "$os_list" | grep -c ",$i,"` -ne 0 ]; then
+	  num_stale_vms=$(($num_stale_vms+1))
+	  stale_vms="$i, $stale_vms"
+	fi  
+  done
+  if [ $num_stale_vms -gt 0 ]; then
+	echo "Found $num_stale_vms Stale VMs: $stale_vms"
+  else
+	echo "No Stale VMs Found"
+  fi
+}
+
+contrail-rm-stale-vm() {
+  for i in `curl -i http://ct1:8082/virtual-machines 2>&1 | awk '/virtual-machines/ { for (i=1;i<=NF; ++i) { if ($i ~ /http/) {gsub(/[\",]/,"",$i); print $i}}}'`;do 
+    vm=`echo $i | sed 's#.*/\([a-z0-9\-]*\)$#\1#i'`
+    for j in `curl -i $i 2>&1 | awk '/virtual-machine/ {for (i=1;i<=NF; ++i) {if ($i ~ /8082\/virtual-machine-interface\//) { gsub(/[\",]/,"",$i); print $i}}}'`; do
+	vmi=`echo $j | sed 's#.*/\([a-z0-9\-]*\)$#\1#i'`
+	for k in `curl -i $j 2>&1 | awk '/virtual-machine-interface/ {for (i=1;i<=NF; ++i) {if ($i ~ /8082\/instance-ip\// || $i ~ /8082\/floating-ip\//) { gsub(/[\",]/,"",$i); print $i}}}'`; do 
+	  iip=`echo $k | sed 's#.*/\([a-z0-9\-]*\)$#\1#i'`
+	  echo "`date` Deleting instance IP reference for VMI $vmi  ($iip)"
+	  curl -X DELETE -H "Content-Type: application/json; charset=UTF-8" $k
+    	done
+	echo "`date` Deleting VMI reference for VM $vm ($vmi)"
+	curl -X DELETE -H "Content-Type: application/json; charset=UTF-8" $j
+    done
+    echo "`date` Deleting VM $vm"	
+    curl -X DELETE -H "Content-Type: application/json; charset=UTF-8" $i
+  done
+}
+
+help() {
+cat <<EOF
+$0 usage
+$0 <subcommand> <argument to subcommand>
+  subcommands:
+	instance-list-on-compute-node	<node name>
+	instance-list-all
+	instance-rm-all-on-compute-node  <node name>
+	instance-rm-all
+	compute-node-list
+	contrail-rm-stale-vm
+	contrail-list-stale-vms
+	instance-boot-on-all-compute-nodes <prefix for instance name> net-id=<network id>
+EOF
+}
+case $1 in
+  instance-list-on-compute-node)
+	instance-list-on-compute-node $2
+  ;;
+  contrail-list-stale-vms)
+	contrail-list-stale-vms
+  ;;
+  contrail-rm-stale-vm)
+	contrail-rm-stale-vm
+  ;;
+  instance-rm-all-on-compute-node)
+	instance-rm-all-on-compute-node $2
+  ;;  
+  instance-rm-all)
+	instance-rm-all
+  ;;
+  instance-boot-on-all-compute-nodes)
+	instance-boot-on-all-compute-nodes $2 $3
+  ;;
+  instance-list-all)
+	instance-list-all 
+  ;;
+
+  compute-node-list)
+	compute-node-list
+  ;;
+
+  help)
+	help
+  ;;
+  
+  *)
+    	help
+  ;;
+esac
+

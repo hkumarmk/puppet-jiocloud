@@ -11,8 +11,8 @@ class jiocloud::params {
   $ssl_key_file_source 	= "$puppet_master_files/ssl/jiocloud.com.key"
   $ssl_ca_file         	= '/etc/apache2/certs/gd_bundle-g2-g1.crt'
   $ssl_ca_file_source  	= "$puppet_master_files/ssl/gd_bundle-g2-g1.crt"
-  $interface_names 	= split($::interfaces, ',')
-  $interface_addresses 	= inline_template('<%= @interface_names.reject{ |ifc| ifc == "lo" }.map{ |ifc| scope.lookupvar("ipaddress_#{ifc}") }.join(" ")
+  $interfaces_array = split($interfaces,',')
+  $interface_addresses 	= inline_template('<%= @interfaces_array.reject{ |ifc| ifc == "lo" }.map{ |ifc| scope.lookupvar("ipaddress_#{ifc}") }.join(" ")
 %>')
   $ip_array = split($interface_addresses, ' ')
   $compute_nodes           = 'cp'
@@ -20,23 +20,78 @@ class jiocloud::params {
   $contrail_nodes          = "ct"
   Exec { path => $executable_path }
   $host_prefix          = inline_template("<%= @hostname.sub(/^\s*([a-zA-Z\-\.]+)\d+$/,'\1') %>")
-  $hgs_to_use_fe_for_connectivity = ['storage_node','database_node','contrail_node']
 
 ### base system environment
-  $all_nodes_pkgs_to_install    = [ 'vim','htop','ethtool','zabbix-agent','zabbix-sender' ]
-  $all_nodes_pkgs_to_remove     = [ 'resolvconf' ]
-  $all_nodes_services_to_run    = [ 'sshd' ]
-  $ntp_server_servers   = [ '10.204.105.101' ]
-  $ntp_servers          = ['i1','i2']
-  $dnsdomainname        = 'mu.jio'
-  $dnssearch            = [ 'mu.jio' ]
-  $dnsservers           = [ '10.135.121.138','10.135.121.107']
-  $dns_master_server    = '10.135.121.138'
-  $dnsupdate_key        = 'yCGS8t1sIM+FoG3xzYfQRQ=='
-  $compute_fe_interface = 'eth2'
-  $compute_be_interface = 'eth3'
-  $network_device_mtu 	= 9000
-  $interfaces_array = split($interfaces,',')
+
+  ## Base system config 
+  $all_nodes_pkgs_to_install = hiera('jiocloud::system::all_nodes_pkgs_to_install',[ 'vim','htop','ethtool','zabbix-agent','zabbix-sender' ])
+  $all_nodes_pkgs_to_remove = hiera('jiocloud::system::all_nodes_pkgs_to_remove',[ 'resolvconf' ])
+  $all_nodes_services_to_run = hiera('jiocloud::system::all_nodes_services_to_run',[ 'ssh' ])
+  ## END Base system config  
+
+  ## NTP server config
+  $ntp_server_servers = hiera('jiocloud::system::ntp_server_servers',[ '10.204.105.101' ]) # NTP servers configured on local ntp servers
+  $ntp_servers = hiera('jiocloud::system::ntp_servers',['i1','i2']) # local ntp servers configured on all servers
+  ## END NTP server config
+
+
+  ## network interface configuration
+  $compute_fe_interface = hiera('jiocloud::system::compute_fe_interface','eth2')
+  $compute_be_interface = hiera('jiocloud::system::compute_be_interface','eth3')
+  $network_device_mtu = hiera('jiocloud::system::network_device_mtu',9000)
+  ## END network interface configuration
+  
+  ## resolv.conf: setup resolv.conf 
+  $dnsdomainname = hiera('jiocloud::system::dnsdomainname','mu.jio')
+  $dnssearch = hiera('jiocloud::system::dnssearch',[ 'mu.jio' ])
+  $dnsservers = hiera('jiocloud::system::dnsservers',[ '10.135.121.138','10.135.121.107'])
+  ## END resolv.conf:
+
+  ###dns cname: Required to setup function based cname in dns 
+  $update_dns	= hiera('jiocloud::system::update_dns',false)
+  $dns_master_server = hiera('jiocloud::system::dns_master_server','10.135.121.138')
+  $dnsupdate_key = hiera('jiocloud::system::dnsupdate_key','yCGS8t1sIM+FoG3xzYfQRQ==')
+  ### END dns cname:
+
+
+  ### system user 
+#  $users      =  
+  $sudo_users = hiera('jiocloud::system::sudo_users',['sanjayu','amar','praveend','soren','rohit','hkumar','niteshb','sudhanshum','nileshp','sjaiswal'])
+  
+  ### END Sudo users
+
+  if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
+    if 'vhost0' in $interfaces_array {
+        $vrouter_interface = vhost0
+        $contrail_vrouter_ip          = $ipaddress_vhost0
+        $contrail_vrouter_netmask     = $netmask_vhost0
+        $contrail_vrouter_nw_first_three        = inline_template("<%= scope.lookupvar('network_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1.\2.\3') %>")
+        $contrail_vrouter_nw_last_oct   = inline_template("<%= scope.lookupvar('network_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4').to_i %>")
+        $contrail_vrouter_nw_first_ip   = $contrail_vrouter_nw_last_oct + 1
+        $contrail_vrouter_gw = "${contrail_vrouter_nw_first_three}.${contrail_vrouter_nw_first_ip}"
+        $contrail_vrouter_cidr1 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr2 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr3 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr4 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr = $contrail_vrouter_cidr1 + $contrail_vrouter_cidr2 + $contrail_vrouter_cidr3 + $contrail_vrouter_cidr4
+     } else {
+        $contrail_vrouter_ip          = inline_template("<%= scope.lookupvar('ipaddress_' + @contrail_vrouter_interface) %>")
+        $contrail_vrouter_netmask     = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface) %>")
+#       $contrail_vrouter_gw     = inline_template("<%= scope.lookupvar('network_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1.\2.\3.'+\4+1) %>")
+        $contrail_vrouter_nw_first_three        = inline_template("<%= scope.lookupvar('network_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1.\2.\3') %>")
+        $contrail_vrouter_nw_last_oct   = inline_template("<%= scope.lookupvar('network_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4').to_i %>")
+        $contrail_vrouter_nw_first_ip   = $contrail_vrouter_nw_last_oct + 1
+        $contrail_vrouter_gw = "${contrail_vrouter_nw_first_three}.${contrail_vrouter_nw_first_ip}"
+        $contrail_vrouter_cidr1 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr2 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr3 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr4 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
+        $contrail_vrouter_cidr = $contrail_vrouter_cidr1 + $contrail_vrouter_cidr2 + $contrail_vrouter_cidr3 + $contrail_vrouter_cidr4
+
+    }
+        class {'::role_contrail_vrouter':}
+  }
+
 
 ## Apt configs
   $local_repo_ip = '10.135.123.75'
@@ -98,6 +153,7 @@ class jiocloud::params {
 ## KVM Environment default 
   $mgmt_vm_virsh_secret_uuid = hiera('jiocloud::kvm::mgmt_vm_virsh_secret_uuid','d5a71695-e4de-45fd-b084-f0af0123fc7d')
   $mgmt_vm_virsh_secret_value = hiera('jiocloud::kvm::mgmt_vm_virsh_secret_uuid','AQCq/iNT2MrcLxAAWU33d+5eftjZA4Ogzmmw4w==')
+  $mgmt_vms  =  hiera('jiocloud::kvm::mgmt_vms',undef)
 
 ### Openstack Environment
   $internal_address		= $public_address

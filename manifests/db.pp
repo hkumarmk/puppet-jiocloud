@@ -10,7 +10,6 @@ class jiocloud::db (
   $os_dbs		     	= $jiocloud::params::os_dbs,
   $other_dbs			= $jiocloud::params::other_dbs,
 ) inherits jiocloud::params  {
-
   
   if is_hash($other_dbs) {
     $dbs = merge($os_dbs,$other_dbs)

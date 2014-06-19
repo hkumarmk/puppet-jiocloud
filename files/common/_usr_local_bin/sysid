@@ -1,0 +1,51 @@
+#!/bin/bash
+abc=ABCDEFGHIJKLMNOPQRSTUVWXYZ
+#location=`dnsdomainname  | cut -f1 -d. | tr a-z A-Z`
+fqdn=`ifconfig | grep inet.addr | grep -v 127.0.0.1 | awk '{split($2,a,":"); system ("host "a[2])}' | grep arpa.domain.name.pointer.[A-Za-z][A-Za-z][0-9][0-9][0-9][0-9] | head -1 | awk '{split($NF,a,".");  print a[1]"."a[2]}'`
+location=`echo ${fqdn#*.} | tr a-z A-Z`
+hname=${fqdn%.*}
+if [ `echo $hname | grep -c "-"` -eq 0 ]; then
+    role="Not Defined"
+else
+    role=`echo $hname |  sed -e 's/[a-zA-Z0-9]\+-\([a-z]\+\)[0-1].*/\1/gi' -e 's/^oC$/Openstack Controller/i' -e 's/^cp$/Openstack Compute/i' -e 's/^z$/Zabbix Server/i' -e 's/^jen$/Jenkins Server/i' -e 's/^db$/MySQL Server/i' -e 's/^cblr$/Cobbler Server/i' -e 's/^i$/Infra Server/i' -e 's/^j$/Jump Host/i' -e 's/^st$/Storage Server/i' -e 's/^repo$/Repo Server/i' -e 's/^ *$/Not Defined/i'`
+fi
+
+if [ `dmidecode | grep -c "Manufacturer: Reliance"` -ne 0 ]; then
+	type="Virtual Machine"
+else
+	type="Bare Metal"
+fi
+letter_room=`expr substr ${hname} 1 1 | tr a-z A-Z`
+room=`expr index $abc $letter_room`
+letter_row=`expr substr ${hname} 2 1 | tr a-z A-Z`
+row=`expr index $abc $letter_row`
+rack_num=`expr substr ${hname} 3 2`
+node_num=`expr substr ${hname} 5 2`
+cat <<EOF
+
+#####################################################
+\$\$\$ Server Position Details \$\$\$
+
+Location	: $location
+Room		: $room
+Server Row	: $row
+Rack Number	: $rack_num
+Server Number	: $node_num
+Server Role	: $role
+Server Type	: $type
+EOF
+if [ "$type" == 'Bare Metal' ]; then
+vms=`virsh -q list --all | awk '{printf $2 ", " }' | sed 's/, *$//'`
+cat <<EOF
+Hosted VMs	: $vms
+EOF
+else
+name=`echo $hname | cut -f1 -d- | sed 's/[FB]$//i'`
+cat <<EOF
+Host Server	: $name
+EOF
+fi
+cat <<EOF
+#####################################################
+
+EOF

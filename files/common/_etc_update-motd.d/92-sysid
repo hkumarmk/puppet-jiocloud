@@ -1,0 +1,2 @@
+#!/bin/bash
+#[ -x /usr/local/bin/sysid ] && /usr/local/bin/sysid || true 
