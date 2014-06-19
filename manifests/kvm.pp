@@ -5,7 +5,7 @@
 ## Dependancy: The hostname need to specified in $vm_hosted_nodes variable in system.pp
 
 class jiocloud::kvm ( 
-  $mgmt_vms,
+  $mgmt_vms = $jiocloud::params::mgmt_vms,
   $mgmt_vm_virsh_secret_value 	= $jiocloud::params::mgmt_vm_virsh_secret_value,
   $mgmt_vm_virsh_secret_uuid 	= $jiocloud::params::mgmt_vm_virsh_secret_uuid,
    
