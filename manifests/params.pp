@@ -21,10 +21,13 @@ class jiocloud::params {
   Exec { path => $executable_path }
   $host_prefix          = inline_template("<%= @hostname.sub(/^\s*([a-zA-Z\-\.]+)\d+$/,'\1') %>")
 
+  ## Environment
+  $my_environment = hiera('jiocloud::my_environment','production')
+
 ### base system environment
 
   ## Base system config 
-  $all_nodes_pkgs_to_install = hiera('jiocloud::system::all_nodes_pkgs_to_install',[ 'vim','htop','ethtool','zabbix-agent','zabbix-sender' ])
+  $all_nodes_pkgs_to_install = hiera('jiocloud::system::all_nodes_pkgs_to_install')
   $all_nodes_pkgs_to_remove = hiera('jiocloud::system::all_nodes_pkgs_to_remove',[ 'resolvconf' ])
   $all_nodes_services_to_run = hiera('jiocloud::system::all_nodes_services_to_run',[ 'ssh' ])
   ## END Base system config  
@@ -55,10 +58,14 @@ class jiocloud::params {
 
 
   ### system user 
-#  $users      =  
-  $sudo_users = hiera('jiocloud::system::sudo_users',['sanjayu','amar','praveend','soren','rohit','hkumar','niteshb','sudhanshum','nileshp','sjaiswal'])
+  $sudo_users = hiera('jiocloud::system::sudo_users',undef)
   
   ### END Sudo users
+
+## Apt configs
+  $local_repo_ip = hiera('jiocloud::system::local_repo_ip','10.135.96.60')
+  $apt_sources = hiera('jiocloud::system::apt_sources',undef)
+
 
   if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
     if 'vhost0' in $interfaces_array {
@@ -89,32 +96,9 @@ class jiocloud::params {
         $contrail_vrouter_cidr = $contrail_vrouter_cidr1 + $contrail_vrouter_cidr2 + $contrail_vrouter_cidr3 + $contrail_vrouter_cidr4
 
     }
-        class {'::role_contrail_vrouter':}
   }
 
 
-## Apt configs
-  $local_repo_ip = '10.135.123.75'
-  $apt_sources = {
-        precise =>  { location => 'http://10.135.96.60/mirror1/mirror/archive.ubuntu.com/ubuntu', repos => 'main restricted universe multiverse', mirror_url => 'http://archive.ubuntu.com/ubuntu'},
-        precise-updates => { location => 'http://10.135.96.60/mirror1/mirror/archive.ubuntu.com/ubuntu',release => 'precise-updates', repos => 'main restricted universe multiverse', mirror_url => 'http://archive.ubuntu.com/ubuntu'},
-        puppetlabs => { location => 'http://10.135.96.60/mirror1/mirror/apt.puppetlabs.com', mirror_url => 'http://apt.puppetlabs.com'},
-        precise-security => { location => 'http://10.135.96.60/mirror1/mirror/security.ubuntu.com/ubuntu', release => 'precise-security', repos => 'main restricted universe multiverse', mirror_url => 'http://security.ubuntu.com/ubuntu/'},
-        zabbix  => { location => 'http://10.135.96.60/mirror1/mirror/repo.zabbix.com/zabbix/2.0/ubuntu', mirror_url => 'http://repo.zabbix.com/zabbix/2.0/ubuntu/' },
-        mariadb => { location => 'http://10.135.96.60/mirror1/mirror/mirror.mephi.ru/mariadb/repo/5.5/ubuntu', mirror_url => 'http://mirror.mephi.ru/mariadb/repo/5.5/ubuntu'},
-        jenkins => { location => 'http://10.135.96.60/mirror1/mirror/pkg.jenkins-ci.org/debian',repos => '',release => 'binary/', mirror_url => 'http://pkg.jenkins-ci.org/debian'},
-        precise-updates-havana => { location => 'http://10.135.96.60/mirror1/mirror/ubuntu-cloud.archive.canonical.com/ubuntu', release => 'precise-updates/havana', mirror_url => 'http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana' },
-        hp-support-pack => { location => 'http://10.135.96.60/mirror1/mirror/downloads.linux.hp.com/SDR/downloads/ProLiantSupportPack', release => 'lucid', repos => 'current/non-free', mirror_url =>'http://downloads.linux.hp.com/SDR/downloads/ProLiantSupportPack/' },
-        hp-mcp  => { location => 'http://10.135.96.60/mirror1/mirror/downloads.linux.hp.com/SDR/downloads/mcp/Debian',repos => 'current/non-free',mirror_url => 'http://downloads.linux.hp.com/SDR/downloads/mcp/ubuntu' },
-        fabric => { location => 'http://10.135.96.60/mirror1/mirror/ppa.launchpad.net/chris-lea/fabric/ubuntu', mirror_url => 'http://ppa.launchpad.net/chris-lea/fabric/ubuntu' },
-        jiocloud-ppa => { location => 'http://10.135.96.60/mirror1/mirror/ppa.launchpad.net/jiocloud/ppa/ubuntu', mirror_url => 'http://ppa.launchpad.net/jiocloud/ppa/ubuntu' },
-        rustedhalo => { location => 'http://10.135.96.60/mirror1/mirror/jiocloud.rustedhalo.com/ubuntu', mirror_url => 'http://jiocloud.rustedhalo.com/ubuntu', environment => ['staging'] },
-        ceph-apache => { location => 'http://10.135.96.60/mirror1/mirror/gitbuilder.ceph.com/apache2-deb-precise-x86_64-basic/ref/master', mirror_url => 'http://gitbuilder.ceph.com/apache2-deb-precise-x86_64-basic/ref/master' },
-        ceph-fastcgi => { location => 'http://10.135.96.60/mirror1/mirror/gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/ref/master', mirror_url => 'http://gitbuilder.ceph.com/libapache-mod-fastcgi-deb-precise-x86_64-basic/ref/master' },
-        ceph-extras => { location => 'http://10.135.96.60/mirror1/mirror/ceph.com/packages/ceph-extras/debian', mirror_url => 'http://ceph.com/packages/ceph-extras/debian' },
-        ceph-emperor => { location => 'http://10.135.96.60/mirror1/mirror/ceph.com/debian-emperor', mirror_url => 'http://ceph.com/debian-emperor/' },
-        contrail => { location => 'http://10.135.96.60/mirror1/contrail' },
-    }
 
   $keystone_db_user             = 'keystone'
   $keystone_db_password         = 'keystone@1234'
@@ -397,9 +381,9 @@ if $ssl_enabled {
   $ceph_radosgw_keyring         = '/etc/ceph/keyring.radosgw.gateway'
   $ceph_radosgw_apache_version  = '2.2.22-2precise.ceph'
   $ceph_radosgw_apache_deps     = ['apache2.2-common','apache2.2-bin']
-  $ceph_glance_keyring          = '/etc/ceph/keyring.ceph.client.glance'
-  $ceph_cinder_volume_keyring   = '/etc/ceph/keyring.ceph.client.cinder_volume'
-  $ceph_cinder_backup_keyring   = '/etc/ceph/keyring.ceph.client.cinder_backup'
+#  $ceph_glance_keyring          = '/etc/ceph/keyring.ceph.client.glance'
+#  $ceph_cinder_volume_keyring   = '/etc/ceph/keyring.ceph.client.cinder_volume'
+#  $ceph_cinder_backup_keyring   = '/etc/ceph/keyring.ceph.client.cinder_backup'
   $ceph_mgmt_vm_keyring         = '/etc/ceph/keyring.ceph.client.mgmt_vm'
 
   $ceph_pool_cinder_volume      = 'volumes'
