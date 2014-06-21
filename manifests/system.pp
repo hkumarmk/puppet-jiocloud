@@ -86,4 +86,7 @@ class jiocloud::system (
   ## Network Setup
   class { 'jiocloud::system::network_config': }
 
+
+  ## Apt source and mirror setup
+  class { 'jiocloud::system::apt': }
 }
