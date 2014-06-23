@@ -174,15 +174,10 @@ class jiocloud::openstack (
 #  ensure_resource('user',['nova','cinder','glance'],
 ####FIXME: CURRENTLY ADDING GLANCE, CINDER, NOVA IN OPENSTACK GROUP IS NOT DONE
 
-  $vncserver_proxyclient_address = inline_template("<%= @ipaddress_eth3 || @ipaddress_br0 %>")
+#  $vncserver_proxyclient_address = inline_template("<%= @ipaddress_eth3 || @ipaddress_br0 %>")
 
 
 
-  if $hostname_lc in $glance_nodes_lc {
-    #package { 'python-ceph': ensure	=> 'installed', }
-	
-     add_ceph_auth_glance {'glance': }
-  }
 
   if ($hostname_lc in $cinder_backup_nodes_lc) or ($hostname_lc in $cinder_volume_nodes_lc) {
 	package { 'ceph-common': ensure	=> 'installed', }

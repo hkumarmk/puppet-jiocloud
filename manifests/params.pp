@@ -230,17 +230,6 @@ class jiocloud::params {
   $keystone_cache_backend_argument = hiera('jiocloud::openstack::keystone::cache_backend_argument',undef)
   ## End: Keystone Cache
 
-  $keystone_accepted_roles      = 'Member, admin, swiftoperator,_member_'
-  $keystone_token_cache_size    = 500
-  $keystone_node                = 't2'
-  $keystone_token_format        = 'uuid'
-
-  $keystone_internal_address    = $keystone_public_address
-  $keystone_admin_address       = $keystone_internal_address
-  $keystone_public_port         = $keystone_port
-  $keystone_admin_port          = 35357
-  $keystone_protocol            = $http_protocol
-  $keystone_version		= 'v2.0'
 
   $keystone_accepted_roles = hiera('jiocloud::openstack::keystone_accepted_roles','Member, admin, swiftoperator,_member_')
   $keystone_token_cache_size = hiera('jiocloud::openstack::keystone_token_cache_size',500)
