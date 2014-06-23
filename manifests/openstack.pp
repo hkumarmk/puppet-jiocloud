@@ -83,7 +83,7 @@ class jiocloud::openstack (
   $memcached_listen = $jiocloud::params::memcached_listen,
   $memcached_max_memory = $jiocloud::params::memcached_max_memory,
   $memcached_port = $jiocloud::params::memcached_port,
-  $memcached_server_url = $jiocloud::params::memcached_server_url,
+  $/*memcached_server*/_url = $jiocloud::params::memcached_server_url,
   $mgmt_vm_virsh_secret_uuid = $jiocloud::params::mgmt_vm_virsh_secret_uuid,
   $network_device_mtu = $jiocloud::params::network_device_mtu,
   $neutron_admin_address = $jiocloud::params::neutron_admin_address,
@@ -176,43 +176,7 @@ class jiocloud::openstack (
 
   $vncserver_proxyclient_address = inline_template("<%= @ipaddress_eth3 || @ipaddress_br0 %>")
 
- 
-  if $hostname_lc in $nova_vncproxy_nodes_lc {
-	$nova_vncproxy_enabled	= true
-  } else {
-	$nova_vncproxy_enabled	= false
-  }
- 
-  if $hostname_lc in $nova_api_nodes_lc {
-	$nova_api_enabled	= true
-  } else {
-	$nova_api_enabled	= false
-  }
 
-
-  if $hostname_lc in $nova_scheduler_nodes_lc {
-	$nova_scheduler_enabled	= true
-  } else {
-	$nova_scheduler_enabled	= false
-  }
-
-  if $hostname_lc in $nova_consoleauth_nodes_lc {
-	$nova_consoleauth_enabled	= true
-  } else {
-	$nova_consoleauth_enabled	= false
-  }
-
-  if $hostname_lc in $conductor_nodes_lc {
-	$nova_conductor_enabled	= true
-  } else {
-	$nova_conductor_enabled	= false
-  }
-
-  if $hostname_lc in $nova_cert_nodes_lc {
-	$nova_cert_enabled	= true
-  } else {
-	$nova_cert_enabled	= false
-  }
 
   if $hostname_lc in $glance_nodes_lc {
     #package { 'python-ceph': ensure	=> 'installed', }
@@ -226,29 +190,8 @@ class jiocloud::openstack (
 	add_ceph_auth_cinder_volume {'cinder_volume':}
   }
 
-	
-  if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
-        package { 'ceph-common': ensure	=> 'installed', }
-	add_ceph_auth_cinder_volume {'cinder_volume':
-		file_owner => 'nova',	
-	}
-	add_ceph_auth_mgmt_vm {'mgmt_vm':}
-  }
 
-  if $hostname_lc in $os_mgmt_nodes_lc {
-    class {'nova::quota': 
-	quota_instances		=> $quota_instances,
-	quota_cores		=> $quota_cores,
-	quota_ram		=> $quota_ram,
-	quota_volumes		=> $quota_volumes,
-	quota_gigabytes		=> $quota_gigabytes,
-	quota_floating_ips	=> $quota_floating_ips,
-	quota_max_injected_files	=> $quota_max_injected_files,
-	quota_security_groups	=> $quota_security_groups,
-	quota_security_group_rules	=> $quota_security_group_rules,
-	quota_key_pairs		=> $quota_key_pairs,
-    }
-  }	
+
 
 ### Setup memcache on memcache nodes
   if $hostname_lc in $memcached_nodes_lc {
@@ -260,98 +203,6 @@ class jiocloud::openstack (
     }
   }
 
-## Setup nova compute on all compute nodes
-if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix { 
-
-    class { 'nova::compute': 
-	enabled			=> true,
-	vncserver_proxyclient_address	=> $vncserver_proxyclient_address,
-	vncproxy_host		=> $vncproxy_host,
-	vncproxy_protocol	=> $vncproxy_protocol,
-	virtio_nic		=> $virtio_nic,
-	neutron_enabled		=> $neutron_enabled,
-	network_device_mtu	=> $::system_env::network_device_mtu,
-	use_local		=> $nova_conductor_use_local,
-    }
-### Enabling vm migration support
-    class { 'nova::compute::libvirt':
-  	migration_support => true,
-	vncserver_listen => '0.0.0.0',
-	libvirt_images_type => $::os_env::nova_libvirt_images_type,
-	snapshot_image_format => $::os_env::nova_snapshot_image_format,
-#	libvirt_images_volume_group => $::os_env::nova_volume_group,
-    }
-
-    class { 'nova::compute::neutron':
-	libvirt_vif_driver	=> $::os_env::neutron_libvirt_vif_driver
-    }
-    
-      
-## Creation of volume group.
-    class { '::lvm':
-      vg => $nova_volume_group,
-      pv => $nova_physical_volumes,
-      ensure => present
-      }
-
-     exec { "lv_$nova_logical_volume": 
-	command => "lvcreate -n $nova_logical_volume -l 100%VG $nova_volume_group",
-	unless  => "lvs --noheading /dev/${nova_volume_group}/${nova_logical_volume}",
-	require => Class['lvm'],
-     }
-
-     ensure_resource('package','xfsprogs',{'ensure' => 'present'})
-
-      exec { "mkfs_/dev/${nova_volume_group}/${nova_logical_volume}":
-        command => "mkfs.xfs -f -d agcount=${::processorcount} -l \
-size=1024m -n size=64k /dev/${nova_volume_group}/${nova_logical_volume}",
-        unless  => "xfs_admin -l /dev/${nova_volume_group}/${nova_logical_volume}",
-        require => [Package['xfsprogs'],Exec["lv_$nova_logical_volume"]],
-      }
-
-      file_line { "fstab_/dev/${nova_volume_group}/${nova_logical_volume}":
-        line => "/dev/${nova_volume_group}/${nova_logical_volume} /var/lib/nova/instances xfs rw,noatime,inode64 0 2",
-        path => "/etc/fstab",
-        require => Exec["mkfs_/dev/${nova_volume_group}/${nova_logical_volume}"],
-      }
-
-      exec { "mount_/dev/${nova_volume_group}/${nova_logical_volume}":
-        command => "mount /dev/${nova_volume_group}/${nova_logical_volume}",
-        unless  => "df /var/lib/nova/instances | grep /dev/mapper/${nova_volume_group}-${nova_logical_volume}",
-        require => File_line["fstab_/dev/${nova_volume_group}/${nova_logical_volume}"],
-     }
-
-    file { '/var/lib/nova/instances':
-       ensure  => directory,
-       owner   => 'nova',
-       group   => 'nova',
-       mode    => '0755',
-       require => Exec["mount_/dev/${nova_volume_group}/${nova_logical_volume}"],
-    } 
-   
-    exec { "secret_define_cinder_volume":
-        command => "echo \"<secret ephemeral='no' private='no'><uuid>$cinder_rbd_secret_uuid</uuid><usage type='ceph'><name>client.cinder_volume</name></usage></secret>\" > /tmp/secret.xml_$mgmt_vm_virsh_secret_uuid && virsh secret-define --file /tmp/secret.xml_$mgmt_vm_virsh_secret_uuid && rm -f /tmp/secret.xml_$mgmt_vm_virsh_secret_uuid",
-        unless => "virsh secret-list | egrep $cinder_rbd_secret_uuid",
-    }
-
-    exec { "secret_set_value_cinder_volume":
-        command => "ceph-authtool /tmp/.exec_add_ceph_auth_admin.tmp \
---create-keyring \
---name=mon. \
---add-key='${::ceph_env::ceph_mon_key}' \
---cap mon 'allow *' && virsh secret-set-value --secret $cinder_rbd_secret_uuid --base64 $(ceph --name mon. --keyring /tmp/.exec_add_ceph_auth_admin.tmp \
-  auth get-or-create-key client.cinder_volume) && rm -f /tmp/.exec_add_ceph_auth_admin.tmp",
-        unless => "ceph-authtool /tmp/.exec_add_ceph_auth_admin.tmp \
---create-keyring \
---name=mon. \
---add-key='${::ceph_env::ceph_mon_key}' \
---cap mon 'allow *' && ceph --name mon. --keyring /tmp/.exec_add_ceph_auth_admin.tmp \
-  auth get-or-create-key client.cinder_volume |grep '$(virsh -q secret-get-value $cinder_rbd_secret_uuid)'",
-	require => Exec["secret_define_cinder_volume"],
-        notify => Service ['libvirt'],
-    }
-    
-  }
 
   if ($hostname_lc in $cinder_api_nodes_lc) or ($hostname_lc in $cinder_scheduler_nodes_lc) or ($hostname_lc in $cinder_volume_nodes_lc) {
     class { 'cinder':
@@ -399,91 +250,10 @@ size=1024m -n size=64k /dev/${nova_volume_group}/${nova_logical_volume}",
 
 ## Setup nova client, nova scheduler (dependancy of zeromq receiver), nova zeromq receiver on all openstack systems.
 
- if is_array($compute_nodes) or  is_array($controller_nodes) or $compute_nodes  or $controller_nodes {
-  if $hostname in $compute_nodes or  $hostname in $controller_nodes or $compute_nodes == $host_prefix  or $controller_node == $host_prefix {
-		
-    package {'python-six': ensure => 'latest', }
-    class { 'nova::client': }
-    class { 'nova::scheduler': enabled	=> $nova_scheduler_enabled, }	
-    class { '::zeromq': }
-#    ensure_resource('package','python-neutronclient',{'ensure' => '2.3.0-0ubuntu1'})
 
-    if $hostname_lc in $controller_nodes_lc {
-      class { 'nova':
-	database_connection	=> "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8",
-	rpc_backend		=> $nova_rpc_backend,
-	glance_api_servers	=> $nova_glance_api_servers,
-	glance_protocol		=> $glance_public_protocol,
-	rpc_zmq_ipc_dir		=> $rpc_zmq_ipc_dir,	
-	matchmaker_ringfile	=> $matchmaker_ringfile,
-	verbose                 => $verbose,
-        debug                   => $debug,	
-	use_syslog		=> $nova_use_syslog,
-	log_facility		=> $nova_syslog_log_facility,
-	memcached_servers	=> $memcached_server_url,
-	default_floating_pool	=> $default_floating_pool,
-      }	
-    } else {
-      class { 'nova':
-        database_connection     => "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8",
-        rpc_backend             => $nova_rpc_backend,
-        glance_api_servers      => $nova_glance_api_servers,
-        glance_protocol         => $glance_public_protocol,
-        rpc_zmq_ipc_dir         => $rpc_zmq_ipc_dir,
-        matchmaker_ringfile     => $matchmaker_ringfile,
-        verbose                 => $verbose,
-        debug                   => $debug,
-        use_syslog              => $nova_use_syslog,
-        log_facility            => $nova_syslog_log_facility,
-      }
-    }
-
-### Fix for deadlock error
-#FIXME: This need to be removed after the fix released
-#    file { '/usr/share/pyshared/nova/db/sqlalchemy/api.py':
-#	ensure  => file,
-#	owner   => 'root',
-#	group   => 'root',
-#	mode    => '0644',
-#	source  => "${::global_env::puppet_master_files}/openstack/all/_usr_share_pyshared_nova_db_sqlalchemy_api.py"
-#    }
-###  nova network neutron
-    class { 'nova::network::neutron':
-	neutron_admin_password		=> $::os_env::service_user_password,
-	neutron_url			=> "${::os_env::neutron_protocol}://${::os_env::neutron_internal_address}:${::os_env::neutron_internal_port}/",
-	neutron_admin_tenant_name	=> $::os_env::service_tenant,
-	neutron_region_name		=> $::os_env::region,
-	neutron_admin_auth_url		=> "${::os_env::keystone_protocol}://${::os_env::keystone_internal_address}:${::os_env::keystone_port}/${::os_env::keystone_version}",
-	neutron_url_timeout		=> $::os_env::neutron_url_timeout,
-    }	
-
-
-# Add services user to group
-     class { '::add_user_to_group': }	
-
-#      file { '/etc/ceph':
-#	 ensure => directory,
-#	 owner	=> root,
-#	 group  => root,
-#	 mode   => '0755',
-#	 before => File['/etc/ceph/ceph.conf'],
-#       }
- 
-#       file { '/etc/ceph/ceph.conf':
-#        ensure  => file,
-#        owner   => 'root',
-#        group   => 'root',
-#        mode    => '0644',
-#        source  => "${::global_env::puppet_master_files}/openstack/all/_etc_ceph_ceph.conf"
-#    }
-  }
-}	
   if $hostname_lc in $controller_nodes_lc {
 
-    package { $controller_nodes_pkgs_to_install:
-	ensure		=> installed,
-    }
-
+   
 
 #FIXME: WORKAROUND TO ENABLE SSL
 
@@ -514,14 +284,6 @@ size=1024m -n size=64k /dev/${nova_volume_group}/${nova_logical_volume}",
     notify  => Service['httpd'],
   }
 
-  file { '/etc/apache2/conf.d/vncproxy.conf':
-    ensure  => $apache_config_ensure,
-    owner   => www-data,
-    group   => www-data,
-    source => "${puppet_master_files}/apache2/vncproxy.conf",
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
 
 
   file { '/etc/apache2/conf.d/glance-registry.conf':
@@ -770,6 +532,247 @@ size=1024m -n size=64k /dev/${nova_volume_group}/${nova_logical_volume}",
 
 
 
+  
+  
+    class { 'openstack::auth_file':
+        admin_password  => $admin_password,
+        controller_node => $::os_env::keystone_public_address,
+        region_name     => $region,
+        keystone_protocol => $::os_env::keystone_protocol,
+        keystone_port   => $::os_env::keystone_public_port,
+        keystone_admin_port     => $::os_env::keystone_admin_port,
+        keystone_version        => $::os_env::keystone_version,
+        admin_tenant    => 'admin',
+    }
+  } 
+} 
+
+
+#########################################3
+
+  if $hostname_lc in $nova_vncproxy_nodes_lc {
+	$nova_vncproxy_enabled	= true
+  } else {
+	$nova_vncproxy_enabled	= false
+  }
+ 
+  if $hostname_lc in $nova_api_nodes_lc {
+	$nova_api_enabled	= true
+  } else {
+	$nova_api_enabled	= false
+  }
+
+
+  if $hostname_lc in $nova_scheduler_nodes_lc {
+	$nova_scheduler_enabled	= true
+  } else {
+	$nova_scheduler_enabled	= false
+  }
+
+  if $hostname_lc in $nova_consoleauth_nodes_lc {
+	$nova_consoleauth_enabled	= true
+  } else {
+	$nova_consoleauth_enabled	= false
+  }
+
+  if $hostname_lc in $conductor_nodes_lc {
+	$nova_conductor_enabled	= true
+  } else {
+	$nova_conductor_enabled	= false
+  }
+
+  if $hostname_lc in $nova_cert_nodes_lc {
+	$nova_cert_enabled	= true
+  } else {
+	$nova_cert_enabled	= false
+  }
+
+  
+## Added to nova/compute.pp
+
+## Setup nova compute on all compute nodes
+if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix { 
+
+    class { 'nova::compute': 
+	enabled			=> true,
+	vncserver_proxyclient_address	=> $vncserver_proxyclient_address,
+	vncproxy_host		=> $vncproxy_host,
+	vncproxy_protocol	=> $vncproxy_protocol,
+	virtio_nic		=> $virtio_nic,
+	neutron_enabled		=> $neutron_enabled,
+	network_device_mtu	=> $::system_env::network_device_mtu,
+	use_local		=> $nova_conductor_use_local,
+    }
+### Enabling vm migration support
+    class { 'nova::compute::libvirt':
+  	migration_support => true,
+	vncserver_listen => '0.0.0.0',
+	libvirt_images_type => $::os_env::nova_libvirt_images_type,
+	snapshot_image_format => $::os_env::nova_snapshot_image_format,
+#	libvirt_images_volume_group => $::os_env::nova_volume_group,
+    }
+
+    class { 'nova::compute::neutron':
+	libvirt_vif_driver	=> $::os_env::neutron_libvirt_vif_driver
+    }
+    
+      
+## Creation of volume group.
+    class { '::lvm':
+      vg => $nova_volume_group,
+      pv => $nova_physical_volumes,
+      ensure => present
+      }
+
+     exec { "lv_$nova_logical_volume": 
+	command => "lvcreate -n $nova_logical_volume -l 100%VG $nova_volume_group",
+	unless  => "lvs --noheading /dev/${nova_volume_group}/${nova_logical_volume}",
+	require => Class['lvm'],
+     }
+
+     ensure_resource('package','xfsprogs',{'ensure' => 'present'})
+
+      exec { "mkfs_/dev/${nova_volume_group}/${nova_logical_volume}":
+        command => "mkfs.xfs -f -d agcount=${::processorcount} -l \
+size=1024m -n size=64k /dev/${nova_volume_group}/${nova_logical_volume}",
+        unless  => "xfs_admin -l /dev/${nova_volume_group}/${nova_logical_volume}",
+        require => [Package['xfsprogs'],Exec["lv_$nova_logical_volume"]],
+      }
+
+      file_line { "fstab_/dev/${nova_volume_group}/${nova_logical_volume}":
+        line => "/dev/${nova_volume_group}/${nova_logical_volume} /var/lib/nova/instances xfs rw,noatime,inode64 0 2",
+        path => "/etc/fstab",
+        require => Exec["mkfs_/dev/${nova_volume_group}/${nova_logical_volume}"],
+      }
+
+      exec { "mount_/dev/${nova_volume_group}/${nova_logical_volume}":
+        command => "mount /dev/${nova_volume_group}/${nova_logical_volume}",
+        unless  => "df /var/lib/nova/instances | grep /dev/mapper/${nova_volume_group}-${nova_logical_volume}",
+        require => File_line["fstab_/dev/${nova_volume_group}/${nova_logical_volume}"],
+     }
+
+    file { '/var/lib/nova/instances':
+       ensure  => directory,
+       owner   => 'nova',
+       group   => 'nova',
+       mode    => '0755',
+       require => Exec["mount_/dev/${nova_volume_group}/${nova_logical_volume}"],
+    } 
+   
+    exec { "secret_define_cinder_volume":
+        command => "echo \"<secret ephemeral='no' private='no'><uuid>$cinder_rbd_secret_uuid</uuid><usage type='ceph'><name>client.cinder_volume</name></usage></secret>\" > /tmp/secret.xml_$mgmt_vm_virsh_secret_uuid && virsh secret-define --file /tmp/secret.xml_$mgmt_vm_virsh_secret_uuid && rm -f /tmp/secret.xml_$mgmt_vm_virsh_secret_uuid",
+        unless => "virsh secret-list | egrep $cinder_rbd_secret_uuid",
+    }
+
+    exec { "secret_set_value_cinder_volume":
+        command => "ceph-authtool /tmp/.exec_add_ceph_auth_admin.tmp \
+--create-keyring \
+--name=mon. \
+--add-key='${::ceph_env::ceph_mon_key}' \
+--cap mon 'allow *' && virsh secret-set-value --secret $cinder_rbd_secret_uuid --base64 $(ceph --name mon. --keyring /tmp/.exec_add_ceph_auth_admin.tmp \
+  auth get-or-create-key client.cinder_volume) && rm -f /tmp/.exec_add_ceph_auth_admin.tmp",
+        unless => "ceph-authtool /tmp/.exec_add_ceph_auth_admin.tmp \
+--create-keyring \
+--name=mon. \
+--add-key='${::ceph_env::ceph_mon_key}' \
+--cap mon 'allow *' && ceph --name mon. --keyring /tmp/.exec_add_ceph_auth_admin.tmp \
+  auth get-or-create-key client.cinder_volume |grep '$(virsh -q secret-get-value $cinder_rbd_secret_uuid)'",
+	require => Exec["secret_define_cinder_volume"],
+        notify => Service ['libvirt'],
+    }
+    
+  }
+
+
+
+#  if is_array($compute_nodes) or  is_array($controller_nodes) or $compute_nodes  or $controller_nodes {
+#  if $hostname in $compute_nodes or  $hostname in $controller_nodes or $compute_nodes == $host_prefix  or $controlle*r_node == $host_prefix {
+ 
+  if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
+        package { 'ceph-common': ensure	=> 'installed', }
+	add_ceph_auth_cinder_volume {'cinder_volume':
+		file_owner => 'nova',	
+	}
+	add_ceph_auth_mgmt_vm {'mgmt_vm':}
+  }
+
+## Added to nova/compute.pp - end
+
+## Added to nova/controller.pp
+
+  if $hostname_lc in $os_mgmt_nodes_lc {
+    class {'nova::quota': 
+	quota_instances		=> $quota_instances,
+	quota_cores		=> $quota_cores,
+	quota_ram		=> $quota_ram,
+	quota_volumes		=> $quota_volumes,
+	quota_gigabytes		=> $quota_gigabytes,
+	quota_floating_ips	=> $quota_floating_ips,
+	quota_max_injected_files	=> $quota_max_injected_files,
+	quota_security_groups	=> $quota_security_groups,
+	quota_security_group_rules	=> $quota_security_group_rules,
+	quota_key_pairs		=> $quota_key_pairs,
+    }
+  }	
+
+## Added to nova/controller.pp
+  
+   if is_array($compute_nodes) or  is_array($controller_nodes) or $compute_nodes  or $controller_nodes {
+  if $hostname in $compute_nodes or  $hostname in $controller_nodes or $compute_nodes == $host_prefix  or $controller_node == $host_prefix {
+		
+    package {'python-six': ensure => 'latest', }
+    class { 'nova::client': }
+    class { 'nova::scheduler': enabled	=> $nova_scheduler_enabled, }	
+    class { '::zeromq': }
+#    ensure_resource('package','python-neutronclient',{'ensure' => '2.3.0-0ubuntu1'})
+
+    if $hostname_lc in $controller_nodes_lc {
+      class { 'nova':
+	database_connection	=> "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8",
+	rpc_backend		=> $nova_rpc_backend,
+	glance_api_servers	=> $nova_glance_api_servers,
+	glance_protocol		=> $glance_public_protocol,
+	rpc_zmq_ipc_dir		=> $rpc_zmq_ipc_dir,	
+	matchmaker_ringfile	=> $matchmaker_ringfile,
+	verbose                 => $verbose,
+        debug                   => $debug,	
+	use_syslog		=> $nova_use_syslog,
+	log_facility		=> $nova_syslog_log_facility,
+	memcached_servers	=> $memcached_server_url,
+	default_floating_pool	=> $default_floating_pool,
+      }	
+    } else {
+      class { 'nova':
+        database_connection     => "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8",
+        rpc_backend             => $nova_rpc_backend,
+        glance_api_servers      => $nova_glance_api_servers,
+        glance_protocol         => $glance_public_protocol,
+        rpc_zmq_ipc_dir         => $rpc_zmq_ipc_dir,
+        matchmaker_ringfile     => $matchmaker_ringfile,
+        verbose                 => $verbose,
+        debug                   => $debug,
+        use_syslog              => $nova_use_syslog,
+        log_facility            => $nova_syslog_log_facility,
+      }
+    }
+
+###  nova network neutron
+    class { 'nova::network::neutron':
+	neutron_admin_password		=> $::os_env::service_user_password,
+	neutron_url			=> "${::os_env::neutron_protocol}://${::os_env::neutron_internal_address}:${::os_env::neutron_internal_port}/",
+	neutron_admin_tenant_name	=> $::os_env::service_tenant,
+	neutron_region_name		=> $::os_env::region,
+	neutron_admin_auth_url		=> "${::os_env::keystone_protocol}://${::os_env::keystone_internal_address}:${::os_env::keystone_port}/${::os_env::keystone_version}",
+	neutron_url_timeout		=> $::os_env::neutron_url_timeout,
+    }	
+
+  }
+}	
+
+ package { $controller_nodes_pkgs_to_install:
+	ensure		=> installed,
+    }
+
 
 ### Setting up nova services
 ##
@@ -805,17 +808,4 @@ size=1024m -n size=64k /dev/${nova_volume_group}/${nova_logical_volume}",
 	port			=> $nova_vncproxy_listen_port,
 	enabled			=> $nova_vncproxy_enabled,
   }	
-  
-  
-    class { 'openstack::auth_file':
-        admin_password  => $admin_password,
-        controller_node => $::os_env::keystone_public_address,
-        region_name     => $region,
-        keystone_protocol => $::os_env::keystone_protocol,
-        keystone_port   => $::os_env::keystone_public_port,
-        keystone_admin_port     => $::os_env::keystone_admin_port,
-        keystone_version        => $::os_env::keystone_version,
-        admin_tenant    => 'admin',
-    }
-  } 
-} 
+    
