@@ -22,10 +22,13 @@ class jiocloud::openstack::glance (
 ) {
   if $hostname_lc in $glance_nodes_lc {
 
-    add_ceph_auth_glance {'glance': }
+#    add_ceph_auth_glance {'glance': }
+    jiocloud::ceph::auth::add_ceph_auth {'glance':
+      file_owner => 'glance',
+    }
 
     # Install and configure glance-api
-    class { 'glance::api':
+    class { '::glance::api':
       verbose           => $verbose,
       debug             => $debug,
       registry_host     => $registry_host,
@@ -46,7 +49,7 @@ class jiocloud::openstack::glance (
     }
 
     # Install and configure glance-registry
-    class { 'glance::registry':
+    class { '::glance::registry':
       verbose           => $verbose,
       debug             => $debug,
       bind_port		=> $registry_bind_port,
@@ -73,7 +76,7 @@ class jiocloud::openstack::glance (
 	fail('swift_store_key must be set when configuring swift as the glance backend')
       }
 
-      class { 'glance::backend::swift':
+      class { '::glance::backend::swift':
 	swift_store_user                    => $swift_store_user,
 	swift_store_key                     => $swift_store_key,
 	swift_store_auth_address            => $swift_store_auth_address,
@@ -81,9 +84,9 @@ class jiocloud::openstack::glance (
       }
     } elsif($backend == 'file') {
     # Configure file storage backend
-      class { 'glance::backend::file': }
+      class { '::glance::backend::file': }
     } elsif($backend == 'rbd') {
-      class { 'glance::backend::rbd':
+      class { '::glance::backend::rbd':
 	rbd_store_user => $rbd_store_user,
 	rbd_store_pool => $rbd_store_pool,
       }

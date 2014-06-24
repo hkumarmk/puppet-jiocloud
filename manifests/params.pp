@@ -370,12 +370,14 @@ class jiocloud::params {
   } 
   $ceph_auth_type               = 'cephx'
   $ceph_mon_port                = '6789'
-  $ceph_radosgw_admin_port      = $ceph_radosgw_public_port
-  $ceph_radosgw_internal_port   = $ceph_radosgw_public_port
+
+
   $ceph_osd_journal_type        = 'first_partition'     ## first_partition -> first partition of the data disk, filesystem -> journal directory under individual disk filesystem, /dev/sdx (device name) - separate journal disk (not implemented)
   $ceph_osd_journal_size        = 10            ## Journal size in GiB, only numaric part, no unit, only applicable for 'first_partition'
   $ceph_keyring                 = '/etc/ceph/keyring'
   $ceph_radosgw_enabled         = true
+  $ceph_radosgw_internal_address     = hiera('jiocloud::openstack::ceph_internal_address',$object_storage_public_address)
+  $ceph_radosgw_admin_address        = hiera('jiocloud::openstack::ceph_admin_address',$ceph_radosgw_internal_address)
   $ceph_radosgw_log_file                = '/var/log/ceph/radosgw.log'
   $ceph_radosgw_serveradmin_email       = 'cloud.devops@ril.com'
   $ceph_radosgw_fastcgi_ext_script      = '/var/www/s3gw.fcgi'

@@ -464,23 +464,6 @@ class jiocloud::openstack (
    	debug		 	=> $debug,
   }
    ->
-  class { 'openstack::glance':
-	db_host                 => $db_host_ip,
-        db_password             => $glance_db_password,
-	user_password		=> $service_user_password,
-	keystone_host		=> $keystone_internal_address,
-        keystone_protocol	=> $keystone_protocol,
-	verbose                 => $verbose,
-        debug                   => $debug,
-        keystone_auth_uri	=> "${::os_env::keystone_protocol}://${::os_env::keystone_internal_address}:${::os_env::keystone_port}/${::os_env::keystone_version}",
-	backend			=> $glance_backend,
-	rbd_store_user		=> $glance_rbd_store_user,
-	rbd_store_pool		=> $glance_rbd_store_pool,
-	registry_bind_port	=> $glance_registry_listen_port,
-	api_bind_port		=> $glance_api_listen_port,
-	registry_host		=> $glance_public_address,
-	registry_protocol	=> $glance_public_protocol,
-  }
 
   if $ceph_env::ceph_radosgw_enabled { 
     class { 'keystone::radosgw':
@@ -496,34 +479,6 @@ class jiocloud::openstack (
     }
   }
  
-  class { '::horizon':
-#    cache_server_ip     => $horizon_cache_server_ip,
-#    cache_server_port   => $horizon_cache_server_port,
-    fqdn		=> $horizon_public_address,
-    secret_key          => $horizon_secret_key,
-    django_debug        => $debug,
-    api_result_limit    => $horizon_api_result_limit,
-    keystone_url	=> "${::os_env::keystone_protocol}://${::os_env::keystone_internal_address}:${::os_env::keystone_port}/${::os_env::keystone_version}",
-    listen_ssl		=> $horizon_ssl_enabled,
-    horizon_key		=> $horizon_ssl_key,
-    horizon_cert	=> $horizon_ssl_cert,
-    horizon_ca		=> $horizon_ssl_cacert,
-    regservice_url      => "https://${horizon_public_address}/horizonreg",
-    package_ensure    	=> $horizon_package_ensure
-
-  }
-
- class { '::jiocloud_registration':
-    fqdn                => $horizon_public_address,
-    keystone_add        => $keystone_public_address,
-    listen_ssl          => $horizon_ssl_enabled,
-    horizon_key         => $horizon_ssl_key,
-    horizon_cert        => $horizon_ssl_cert,
-    horizon_ca          => $horizon_ssl_cacert,
-    keystone_public_port => $keystone_port,
-    keystone_admin_token => $admin_token,
-    package_ensure      => $jiocloud_registration_package_ensure,
-  }
 
 
 
