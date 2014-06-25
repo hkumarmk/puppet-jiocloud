@@ -41,7 +41,8 @@ class jiocloud::system (
     domain_name           => $dnsdomainname,
     dns_master_server     => $dns_master_server,
     dnsupdate_key         => $dnsupdate_key,
-    update_dns            => $update_dns,
+# Alok - Disableing this for now. Amar will be uploading a new module
+#    update_dns            => $update_dns,
   }
     
   ## Setup user accounts
