@@ -54,6 +54,7 @@ class jiocloud::params {
 
 
   ### system user 
+  $local_users = hiera('jiocloud::system::local_users',undef)
   $sudo_users = hiera('jiocloud::system::sudo_users',undef)
   
   ### END Sudo users

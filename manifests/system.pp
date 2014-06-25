@@ -7,6 +7,7 @@
 ## dns_master_server: master dns server 
 ## update_dns: true to create cnames with functional based short names for the servers.
 ## dnsupdate_key: secure key to update dns server
+## local_users : users for whom local accounts is to be created
 ## sudo_users: users to setup sudo with all commands allowed
 ## all_nodes_services_to_run: services to assure to be started on all nodes
 ## ntp_server_servers: list of ntp servers to be configured on local ntp servers
@@ -14,6 +15,7 @@
 ##
 ## ChangeLog:
 # 2014-06-18: Hkumar: migrated to jiocloud module 
+# 2014-06-25: AlokJani: Adding local_users parameter
 
 class jiocloud::system ( 
   $dnsdomainname = $jiocloud::params::dnsdomainname,
@@ -22,6 +24,7 @@ class jiocloud::system (
   $dns_master_server = $jiocloud::params::dns_master_server,
   $dnsupdate_key = $jiocloud::params::dnsupdate_key,
   $update_dns = $jiocloud::params::update_dns,
+  $local_users = $jiocloud::params::local_users,
   $sudo_users = $jiocloud::params::sudo_users,
   $all_nodes_services_to_run = $jiocloud::params::all_nodes_services_to_run,
   $ntp_server_servers = $jiocloud::params::ntp_server_servers,
@@ -47,6 +50,7 @@ class jiocloud::system (
     
   ## Setup user accounts
   class {'jiocloud::system::accounts':
+    local_users => $local_users,
     sudo_users => $sudo_users,
   }
 

@@ -1,8 +1,10 @@
 class jiocloud::system::accounts (
+  $local_users,
   $sudo_users,
 ) {
   include account
   realize Account::Localuser[user1,user2]
+
 
   class { 'sudo':
         purge => false,
@@ -18,6 +20,4 @@ class jiocloud::system::accounts (
   }
 
 }
-
-
 
