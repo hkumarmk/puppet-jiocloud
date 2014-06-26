@@ -7,7 +7,7 @@ class jiocloud::system::apt (
 ) {
   class { '::apt':
   always_apt_update    => false,
-  disable_keys         => undef,
+  disable_keys         => true,
   purge_sources_list   => true,
   purge_sources_list_d => true,
   purge_preferences_d  => false,
