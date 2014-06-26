@@ -7,15 +7,15 @@ class jiocloud::system::apt (
 ) {
   class { '::apt':
   always_apt_update    => false,
-  disable_keys         => true,
+  disable_keys         => undef,
   purge_sources_list   => true,
   purge_sources_list_d => true,
   purge_preferences_d  => false,
   }
 
-  class { '::apt::release':
-      release_id => 'precise',
-  } 
+#  class { '::apt::release':
+#      release_id => 'precise',
+#  } 
  
   if $local_repo_ip in $ip_array {
     class { '::apt::mirror':}
