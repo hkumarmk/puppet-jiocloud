@@ -403,7 +403,7 @@ class jiocloud::params {
    if (is_array($compute_nodes) and $hostname in $compute_nodes)  or ($compute_nodes and $compute_nodes == $host_prefix) {
     $iam_compute_node = true
   } 
-  if (is_array($controller_nodes) and $hostname in $controller_nodes)  or ($controller_nodes and $controller_nodes == $host_prefix) {
+  if (is_array($os_controller_nodes) and $hostname in $os_controller_nodes)  or ($os_controller_nodes and $os_controller_nodes == $host_prefix) {
     $iam_os_controller_node = true
   }
   if (is_array($storage_nodes) and $hostname in $storage_nodes)  or ($storage_nodes and $storage_nodes == $host_prefix) {
