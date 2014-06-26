@@ -173,7 +173,7 @@ class jiocloud::params {
     $cinder_public_address       = hiera('jiocloud::openstack::cinder_public_address')
     $glance_public_address       = hiera('jiocloud::openstack::glance_public_address')
     $object_storage_public_address = hiera('jiocloud::openstack::object_storage_public_address')
-    $neutron_public_address      = hiera('jiocloud::openstack::neutron_public_address')
+    $neutron_public_address      = hiera('jiocloud::openstack::nova_public_address')
     $horizon_public_address	= hiera('jiocloud::openstack::horizon_public_address')
   } else {
     $public_address = hiera('jiocloud::public_address')
@@ -347,7 +347,7 @@ class jiocloud::params {
   $memcached_listen = hiera('jiocloud::openstack::memcached_listen','0.0.0.0')
   $memcached_port = hiera('jiocloud::openstack::memcached_port','11211')
   $memcached_max_memory = hiera('jiocloud::openstack::memcached_max_memory',5120)
-  $memcached_server_url = inline_template('<% @memcached_nodes.each do | mc | @mc_url = "#@mc_url #{mc}:#@memcached_port," %> <% end %> <%= @mc_url.gsub(/^ */,"").gsub(/, *$/,"") %> ')
+  $memcached_server_url = [inline_template('<% @memcached_nodes.each do | mc | @mc_url = "#@mc_url #{mc}:#@memcached_port," %> <% end %> <%= @mc_url.gsub(/^ */,"").gsub(/, *$/,"") %> ')]
 
   $horizon_secret_key           = $service_user_password
   $horizon_api_result_limit     = hiera('jiocloud::openstack::horizon_api_result_limit',2000)
