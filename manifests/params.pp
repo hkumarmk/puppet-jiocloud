@@ -173,7 +173,7 @@ class jiocloud::params {
     $cinder_public_address       = hiera('jiocloud::openstack::cinder_public_address')
     $glance_public_address       = hiera('jiocloud::openstack::glance_public_address')
     $object_storage_public_address = hiera('jiocloud::openstack::object_storage_public_address')
-    $neutron_public_address      = hiera('jiocloud::openstack::nova_public_address')
+    $neutron_public_address      = hiera('jiocloud::openstack::neutron_public_address')
     $horizon_public_address	= hiera('jiocloud::openstack::horizon_public_address')
   } else {
     $public_address = hiera('jiocloud::public_address')
