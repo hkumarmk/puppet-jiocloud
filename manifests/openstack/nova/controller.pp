@@ -11,7 +11,7 @@ class jiocloud::openstack::nova::controller (
   $quota_security_groups = $jiocloud::params::quota_security_groups,
   $quota_security_group_rules = $jiocloud::params::quota_security_group_rules,
   $quota_key_pairs = $jiocloud::params::quota_key_pairs,
-  $controller_nodes_pkgs_to_install = $jiocloud::params::controller_nodes_pkgs_to_install,
+  $os_controller_nodes_pkgs_to_install = $jiocloud::params::os_controller_nodes_pkgs_to_install,
   $nova_vncproxy_nodes = $jiocloud::params::nova_vncproxy_nodes,
   $nova_api_nodes = $jiocloud::params::nova_api_nodes,
   $nova_scheduler_nodes = $jiocloud::params::nova_scheduler_nodes,
@@ -21,11 +21,30 @@ class jiocloud::openstack::nova::controller (
   $nova_osapi_compute_listen_port = $jiocloud::params::nova_osapi_compute_listen_port,
   $nova_ec2_listen_port = $jiocloud::params::nova_ec2_listen_port,
   $keystone_protocol = $jiocloud::params::keystone_protocol,
+  $keystone_internal_address = $jiocloud::params::keystone_internal_address,
   $nova_workers = $jiocloud::params::nova_workers,
   $nova_port_to_apache = $jiocloud::params::nova_port_to_apache,
   $nova_neutron_metadata_proxy_shared_secret = $jiocloud::params::nova_neutron_metadata_proxy_shared_secret,
   $nova_conductor_workers = $jiocloud::params::nova_conductor_workers,
   $nova_vncproxy_listen_port = $jiocloud::params::nova_vncproxy_listen_port,
+  $nova_db_url = $jiocloud::params::nova_db_url,
+  $nova_rpc_backend = $jiocloud::params::nova_rpc_backend,
+  $nova_glance_api_servers = $jiocloud::params::nova_glance_api_servers,
+  $glance_protocol = $jiocloud::params::glance_protocol,
+  $rpc_zmq_ipc_dir = $jiocloud::params::rpc_zmq_ipc_dir,
+  $matchmaker_ringfile = $jiocloud::params::matchmaker_ringfile,
+  $verbose = $jiocloud::params::verbose,
+  $debug = $jiocloud::params::debug,
+  $nova_use_syslog = $jiocloud::params::nova_use_syslog,
+  $nova_syslog_log_facility = $jiocloud::params::nova_syslog_log_facility,
+  $memcached_server_url = $jiocloud::params::memcached_server_url,
+  $default_floating_pool = $jiocloud::params::default_floating_pool,
+  $service_user_password = $jiocloud::params::service_user_password,
+  $neutron_internal_url = $jiocloud::params::neutron_internal_url,
+  $neutron_url_timeout = $jiocloud::params::neutron_url_timeout,
+  $service_tenant = $jiocloud::params::service_tenant,
+  $region = $jiocloud::params::region,
+  $keystone_internal_url = $jiocloud::params::keystone_internal_url,
 
 ) {
   
@@ -55,7 +74,6 @@ class jiocloud::openstack::nova::controller (
   
   class { '::nova::client': }
   class { '::nova::scheduler': enabled	=> true, }	
-  class { '::zeromq': }
   
   class { '::nova':
     database_connection	=> $nova_db_url,
