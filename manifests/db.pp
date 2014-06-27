@@ -11,6 +11,9 @@ class jiocloud::db (
   $other_dbs			= $jiocloud::params::other_dbs,
 ) inherits jiocloud::params  {
   
+ class { '::mysql::client':
+    package_name	=> $mysql_client_package_name,
+ }
   if is_hash($other_dbs) {
     $dbs = merge($os_dbs,$other_dbs)
   } else {
@@ -19,9 +22,6 @@ class jiocloud::db (
 
   if $db_host_ip in $jiocloud::params::ip_array {
     create_resources(db_def,$dbs)
-    class { '::mysql::client':
-	package_name	=> $mysql_client_package_name,
-    }
 
     class { '::mysql::server':
         root_password   => $mysql_root_pass,
@@ -70,8 +70,6 @@ size=1024m -n size=64k ${mysql_data_disk}",
 	command => "mysql_install_db --user=mysql; rm -f /root/.my.cnf",
 	unless  => "ls ${mysql_datadir}/mysql",
     }
-  }  else {
-    fail('db_host_ip must be provided')
   }  
 }
 
