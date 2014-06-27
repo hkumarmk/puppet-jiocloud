@@ -150,6 +150,7 @@ class jiocloud::params {
     $nova_osapi_compute_listen_port   = 18774
     $nova_ec2_listen_port = 18773
     $multi_url_port = 443
+    $service_listen_address = '127.0.0.1'
   } else {
     $http_protocol = 'http'
     $glance_registry_listen_port  = 9191
@@ -161,6 +162,7 @@ class jiocloud::params {
     $nova_osapi_compute_listen_port = 8774
     $nova_ec2_listen_port         = 8773
     $multi_url_port = 80
+    $service_listen_address = '0.0.0.0'
   }
   
   if $multi_url {

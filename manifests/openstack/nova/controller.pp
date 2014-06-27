@@ -45,6 +45,7 @@ class jiocloud::openstack::nova::controller (
   $service_tenant = $jiocloud::params::service_tenant,
   $region = $jiocloud::params::region,
   $keystone_internal_url = $jiocloud::params::keystone_internal_url,
+  $service_listen_address = $jiocloud::params::service_listen_address,
 
 ) {
   
@@ -118,6 +119,8 @@ class jiocloud::openstack::nova::controller (
     enabled			=> $nova_api_enabled,
     auth_host			=> $keystone_internal_address,
     osapi_compute_listen_port	=> $nova_osapi_compute_listen_port,
+    api_bind_address		=> $service_listen_address,
+    metadata_listen		=> $service_listen_address,
     ec2_listen_port		=> $nova_ec2_listen_port,
     auth_protocol		=> $keystone_protocol,
     auth_strategy		=> 'keystone',
@@ -142,6 +145,7 @@ class jiocloud::openstack::nova::controller (
   }	
 
   class { 'nova::vncproxy':
+    host => $service_listen_address,
     port => $nova_vncproxy_listen_port,
     enabled => $nova_vncproxy_enabled,
   }	
