@@ -2,6 +2,7 @@
 ## Global environments come here
 class jiocloud::params {
   $executable_path	= [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin/","/usr/local/sbin/" ]
+  
   $ssl_enabled          = true
   $multi_url		= true
   $ssl_cert_file_source = "puppet:///modules/jiocloud/ssl/jiocloud.com.crt"
@@ -19,7 +20,7 @@ class jiocloud::params {
   
   ## Environment
   $my_environment = hiera('jiocloud::my_environment','production')
-
+  Exec { path => $executable_path }
 ### base system environment
 
   ## Base system config 
