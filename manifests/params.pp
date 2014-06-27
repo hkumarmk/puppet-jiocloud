@@ -4,12 +4,12 @@ class jiocloud::params {
   $executable_path	= [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin/","/usr/local/sbin/" ]
   $ssl_enabled          = true
   $multi_url		= true
-  $ssl_cert_file_source = "$puppet_master_files/ssl/jiocloud.com.crt"
+  $ssl_cert_file_source = "puppet:///modules/jiocloud/ssl/jiocloud.com.crt"
   $ssl_cert_file       	= '/etc/apache2/certs/jiocloud.com.crt'
   $ssl_key_file        	= '/etc/apache2/certs/jiocloud.com.key'
-  $ssl_key_file_source 	= "$puppet_master_files/ssl/jiocloud.com.key"
+  $ssl_key_file_source 	= "puppet:///modules/jiocloud/ssl/jiocloud.com.key"
   $ssl_ca_file         	= '/etc/apache2/certs/gd_bundle-g2-g1.crt'
-  $ssl_ca_file_source  	= "$puppet_master_files/ssl/gd_bundle-g2-g1.crt"
+  $ssl_ca_file_source  	= "puppet:///modules/jiocloud/ssl/gd_bundle-g2-g1.crt"
   $interfaces_array = split($interfaces,',')
   $interface_addresses 	= inline_template('<%= @interfaces_array.reject{ |ifc| ifc == "lo" }.map{ |ifc| scope.lookupvar("ipaddress_#{ifc}") }.join(" ")
 %>')
