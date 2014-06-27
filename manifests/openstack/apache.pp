@@ -7,6 +7,7 @@ class jiocloud::openstack::apache (
   $ssl_ca_file_source = $jiocloud::params::ssl_ca_file_source,
   $ssl_ca_file = $jiocloud::params::ssl_ca_file,
   $nova_port_to_apache = $jiocloud::params::nova_port_to_apache,
+  $ssl_enabled = $jiocloud::params::ssl_enabled,
 ) {
 
   #FIXME: WORKAROUND TO ENABLE SSL
@@ -53,7 +54,7 @@ class jiocloud::openstack::apache (
     ensure  => file,
     owner   => www-data,
     group   => www-data,
-    content => template("puppet:///modules/jiocloud/apache2/horizon.conf.erb"),
+    content => template("jiocloud/apache2/horizon.conf.erb"),
     mode    => '0644',
     notify  => Service['httpd'],
   }
@@ -62,7 +63,7 @@ class jiocloud::openstack::apache (
     ensure  => file,
     owner   => www-data,
     group   => www-data,
-    content => template("puppet:///modules/jiocloud/apache2/jiocloud-registration-service.conf"),
+    content => template("jiocloud/apache2/jiocloud-registration-service.conf"),
     mode    => '0644',
     notify  => Service['httpd'],
   }
