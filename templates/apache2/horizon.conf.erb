@@ -4,12 +4,12 @@
 
   ## Vhost docroot
 DocumentRoot /var/www
-<% if @horizon_ssl_enabled %>
+<% if @ssl_enabled %>
 RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
 <% end %>
-<% if @horizon_ssl_enabled == false %>
+<% if @ssl_enabled == false %>
 WSGIScriptAlias /horizon /usr/share/openstack-dashboard/openstack_dashboard/wsgi/django.wsgiq
 WSGIDaemonProcess horizon user=horizon group=horizon processes=3 threads=10
 WSGIProcessGroup horizon
@@ -40,7 +40,7 @@ RedirectMatch permanent ^/$ /horizon/
   ## Script alias directives
 #  ScriptAlias /cgi-bin/ /usr/lib/cgi-bin
 </VirtualHost>
-<% if @horizon_ssl_enabled %>
+<% if @ssl_enabled %>
 <IfModule mod_ssl.c>
 Listen *:443
 <VirtualHost *:443>
