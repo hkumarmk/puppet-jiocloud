@@ -9,18 +9,21 @@ class jiocloud::openstack::glance (
   $registry_host = $jiocloud::params::glance_public_address,
   $registry_protocol = $jiocloud::params::glance_protocol,
   $registry_bind_port = $jiocloud::params::registry_bind_port,
-  $keystone_port = $jiocloud::params::keystone_port
-  $keystone_host = $jiocloud::params::keystone_internal_address
-  $keystone_protocol = $jiocloud::params::keystone_protocol
+  $keystone_port = $jiocloud::params::keystone_port,
+  $keystone_host = $jiocloud::params::keystone_internal_address,
+  $keystone_protocol = $jiocloud::params::keystone_protocol,
   $keystone_auth_uri = $jiocloud::params::keystone_internal_url,
   $keystone_tenant = $jiocloud::params::service_tenant,
   $keystone_password = $jiocloud::params::service_user_password,
-  $sql_connection = $jiocloud::params::$glance_db_url,
+  $sql_connection = $jiocloud::params::glance_db_url,
   $use_syslog = $jiocloud::params::glance_use_syslog,
   $log_facility = $jiocloud::params::glance_syslog_log_facility,
   $api_bind_port = $jiocloud::params::glance_api_listen_port,
+  $glance_nodes = $jiocloud::params::glance_nodes,
+  $backend = $jiocloud::params::glance_backend,
+  $service_listen_address = $jiocloud::params::service_listen_address,
 ) {
-  if $hostname_lc in $glance_nodes_lc {
+  if downcase($hostname) in downcase($glance_nodes) {
 
 #    add_ceph_auth_glance {'glance': }
     jiocloud::ceph::auth::add_ceph_auth {'glance':
@@ -34,6 +37,7 @@ class jiocloud::openstack::glance (
       registry_host     => $registry_host,
       registry_protocol	=> $registry_protocol,
       bind_port		=> $api_bind_port,
+      bind_host		=> $service_listen_address,
       auth_type         => 'keystone',
       auth_port         => $keystone_port,
       auth_host         => $keystone_host,
@@ -53,6 +57,7 @@ class jiocloud::openstack::glance (
       verbose           => $verbose,
       debug             => $debug,
       bind_port		=> $registry_bind_port,
+      bind_host         => $service_listen_address,
       auth_host         => $keystone_host,
       auth_uri          => $keystone_auth_uri,
       auth_port         => $keystone_port,
