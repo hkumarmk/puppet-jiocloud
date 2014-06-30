@@ -25,6 +25,7 @@ class jiocloud::db (
 
     class { '::mysql::server':
         root_password   => $mysql_root_pass,
+	restart 	=> true,
         package_name    => $mysql_server_package_name,
         override_options => { 'mysqld' => {
                   'max_connections'     => $mysql_max_connections,
