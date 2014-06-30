@@ -20,7 +20,6 @@ class jiocloud::params {
   
   ## Environment
   $my_environment = hiera('jiocloud::my_environment','production')
-  Exec { path => $executable_path }
 ### base system environment
 
   ## Base system config 
@@ -175,7 +174,7 @@ class jiocloud::params {
     $keystone_public_address	= hiera('jiocloud::openstack::keystone_public_address')
     $cinder_public_address       = hiera('jiocloud::openstack::cinder_public_address')
     $glance_public_address       = hiera('jiocloud::openstack::glance_public_address')
-    $object_storage_public_address = hiera('jiocloud::openstack::object_storage_public_address')
+    $object_storage_public_address = hiera('jiocloud::ceph::radosgw_public_address')
     $neutron_public_address      = hiera('jiocloud::openstack::nova_public_address')
     $horizon_public_address	= hiera('jiocloud::openstack::horizon_public_address')
   } else {
@@ -372,37 +371,64 @@ class jiocloud::params {
     $ceph_radosgw_protocol	= 'http'
     $ceph_radosgw_public_port     = 80
   } 
-  $ceph_auth_type               = 'cephx'
-  $ceph_mon_port                = '6789'
+  $ceph_auth_type               = hiera('jiocloud::ceph::auth_type','cephx')
+  $ceph_mon_port                = hiera('jiocloud::ceph::mon_port','6789')
 
+  $ceph_fsid                    = hiera('jiocloud::ceph::fsid')
+  $ceph_mon_key                 = hiera('jiocloud::ceph::mon_key')
+  $ceph_storage_cluster_interface	= hiera('jiocloud::ceph::storage_cluster_interface',undef)
+  $ceph_public_interface	= hiera('jiocloud::ceph::ceph_public_interface',undef)
+#  $ceph_storage_cluster_nw_input = hiera('jiocloud::ceph::storage_cluster_network',undef)
+#  $ceph_public_nw_input          = hiera('jiocloud::ceph::ceph_public_network',undef)
+  $ceph_radosgw_nodes           = hiera('jiocloud::ceph::radosgw_nodes')
+  $ceph_osds 	= hiera('jiocloud::ceph::osds') 
+  $ceph_mon_config = hiera('jiocloud::ceph::mon_config')
+  $ceph_radosgw_public_address = hiera('jiocloud::ceph::radosgw_public_address')
+  $ceph_radosgw_internal_address = hiera('jiocloud::ceph::radosgw_internal_address',$ceph_radosgw_public_address)
+  $ceph_radosgw_admin_address = hiera('jiocloud::ceph::radosgw_admin_address',$ceph_radosgw_internal_address)
 
-  $ceph_osd_journal_type        = 'first_partition'     ## first_partition -> first partition of the data disk, filesystem -> journal directory under individual disk filesystem, /dev/sdx (device name) - separate journal disk (not implemented)
-  $ceph_osd_journal_size        = 10            ## Journal size in GiB, only numaric part, no unit, only applicable for 'first_partition'
-  $ceph_keyring                 = '/etc/ceph/keyring'
-  $ceph_radosgw_enabled         = true
-  $ceph_radosgw_internal_address     = hiera('jiocloud::openstack::ceph_internal_address',$object_storage_public_address)
-  $ceph_radosgw_admin_address        = hiera('jiocloud::openstack::ceph_admin_address',$ceph_radosgw_internal_address)
-  $ceph_radosgw_log_file                = '/var/log/ceph/radosgw.log'
-  $ceph_radosgw_serveradmin_email       = 'cloud.devops@ril.com'
-  $ceph_radosgw_fastcgi_ext_script      = '/var/www/s3gw.fcgi'
-  $ceph_radosgw_socket          = '/var/run/ceph/radosgw.sock'
-  $ceph_radosgw_fastcgi_ext_script_source       = "$puppet_master_files/ceph/_var_www_s3gw.fcgi"
-  $ceph_radosgw_keyring         = '/etc/ceph/keyring.radosgw.gateway'
+  ### first_partition -> first partition of the data disk, filesystem -> journal directory under individual disk filesystem, /dev/sdx (device name) - separate journal disk (not implemented)
+  $ceph_osd_journal_type        = hiera('jiocloud::ceph::osd_journal_type','first_partition')
+  $ceph_osd_journal_size        = hiera('jiocloud::ceph::osd_journal_size',10)            ## Journal size in GiB, only numaric part, no unit, only applicable for 'first_partition'
+  $ceph_keyring                 = hiera('jiocloud::ceph::ceph_keyring','/etc/ceph/keyring')
+  $ceph_radosgw_enabled         = hiera('jiocloud::ceph::radosgw_enabled',true)
+  $ceph_radosgw_log_file                = hiera('jiocloud::ceph::radosgw_log_file','/var/log/ceph/radosgw.log')
+  $ceph_radosgw_serveradmin_email       = $admin_email 
+  $ceph_radosgw_fastcgi_ext_script      = hiera('jiocloud::ceph::fastcgi_ext_script','/var/www/s3gw.fcgi')
+  $ceph_radosgw_socket          = hiera('jiocloud::ceph::radosgw_socket','/var/run/ceph/radosgw.sock')
+  $ceph_radosgw_fastcgi_ext_script_source       = "puppet://modules/jiocloud/ceph/_var_www_s3gw.fcgi"
+#  $ceph_radosgw_keyring         = '/etc/ceph/keyring.radosgw.gateway'
   $ceph_radosgw_apache_version  = '2.2.22-2precise.ceph'
   $ceph_radosgw_apache_deps     = ['apache2.2-common','apache2.2-bin']
-#  $ceph_glance_keyring          = '/etc/ceph/keyring.ceph.client.glance'
-#  $ceph_cinder_volume_keyring   = '/etc/ceph/keyring.ceph.client.cinder_volume'
-#  $ceph_cinder_backup_keyring   = '/etc/ceph/keyring.ceph.client.cinder_backup'
-  $ceph_mgmt_vm_keyring         = '/etc/ceph/keyring.ceph.client.mgmt_vm'
 
-  $ceph_pool_cinder_volume      = 'volumes'
-  $ceph_pool_cinder_backup      = 'backups'
-  $ceph_pool_glance_image       = 'images'
+  $ceph_pool_cinder_volume      = hiera('jiocloud::ceph::cinder_volume_pool','volumes')
+  $ceph_pool_cinder_backup      = hiera('jiocloud::ceph::cinder_backup_pool','backups')
+  $ceph_pool_glance_image       = hiera('jiocloud::ceph::glance_image_pool','images')
 
   $ceph_pools_to_add            = [ $ceph_pool_cinder_volume, $ceph_pool_cinder_backup, $ceph_pool_glance_image ]
-  $ceph_pool_number_of_pgs      = 128
+  $ceph_pool_number_of_pgs      = hiera('jiocloud::ceph::number_of_pgs',128)
  
+  ##FIXME: Currently only ceph_storage_cluster_interface and ceph_public_interface is supported, 
+  if $ceph_storage_cluster_interface {
+    $ceph_storage_cluster_network = inline_template("<%= scope.lookupvar('network_' + @ceph_storage_cluster_interface) %>")
+  } elsif $ceph_storage_cluster_nw_input {
+    $ceph_storage_cluster_network = $ceph_storage_cluster_nw_input
+  } else {
+    fail ('Errr: either of jiocloud::ceph::storage_cluster_interface or jiocloud::ceph::storage_cluster_network must be set')
+  }
  
+  if $ceph_public_interface {
+    $ceph_public_network = inline_template("<%= scope.lookupvar('network_' + @ceph_public_interface) %>")
+  } elsif $ceph_public_nw_input {
+    $ceph_public_network = $ceph_public_nw_input
+  } else {
+    fail ('Errr: either of jiocloud::ceph::ceph_public_interface or jiocloud::ceph::ceph_public_network must be set')
+  } 
+
+  $ceph_public_address          = inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_public_interface) %>")
+  $ceph_mon_ip			= $ceph_public_address
+  $ceph_cluster_address		= inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_storage_cluster_interface) %>")
+
    if (is_array($compute_nodes) and $hostname in $compute_nodes)  or ($compute_nodes and $compute_nodes == $host_prefix) {
     $iam_compute_node = true
   } 
