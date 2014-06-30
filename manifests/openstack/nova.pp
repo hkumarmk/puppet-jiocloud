@@ -17,5 +17,7 @@ class jiocloud::openstack::nova (
   } elsif $iam_os_controller_node {
       class { 'jiocloud::openstack::nova::controller':}
   }  
-  class { '::nova::zeromq': }
+  if $iam_compute_node or $iam_os_controller_node {
+    class { '::nova::zeromq': }
+  }
 }
