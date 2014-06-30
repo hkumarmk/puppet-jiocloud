@@ -7,13 +7,13 @@ class jiocloud::openstack::keystone (
   $cinder_internal_address = $jiocloud::params::cinder_internal_address,
   $cinder_protocol = $jiocloud::params::cinder_protocol,
   $cinder_public_address = $jiocloud::params::cinder_public_address,
-  $cinder_public_port = $jiocloud::params::cinder_public_port,
+  $cinder_public_port = $jiocloud::params::cinder_port,
   $db_host_ip = $jiocloud::params::db_host_ip,
   $debug = $jiocloud::params::debug,
   $glance_admin_address = $jiocloud::params::glance_admin_address,
   $glance_internal_address = $jiocloud::params::glance_internal_address,
   $glance_public_address = $jiocloud::params::glance_public_address,
-  $glance_public_port = $jiocloud::params::glance_public_port,
+  $glance_public_port = $jiocloud::params::glance_port,
   $glance_public_protocol = $jiocloud::params::glance_protocol,
   $keystone_admin_address = $jiocloud::params::keystone_admin_address,
   $keystone_admin_listen_port = $jiocloud::params::keystone_admin_listen_port,
@@ -40,7 +40,7 @@ class jiocloud::openstack::keystone (
   $nova_internal_address = $jiocloud::params::nova_internal_address,
   $nova_protocol = $jiocloud::params::nova_protocol,
   $nova_public_address = $jiocloud::params::nova_public_address,
-  $nova_public_port = $jiocloud::params::nova_public_port,
+  $nova_public_port = $jiocloud::params::nova_port,
   $region = $jiocloud::params::region,
   $service_user_password = $jiocloud::params::service_user_password,
   $verbose = $jiocloud::params::verbose,
@@ -58,7 +58,7 @@ class jiocloud::openstack::keystone (
   $keystone_version = $jiocloud::params::keystone_version,
   $region = $jiocloud::params::region,
 ) {
-  class { 'openstack::keystone':
+  class { '::openstack::keystone':
     db_host => $db_host_ip,
     db_password => $keystone_db_password,
     admin_token => $admin_token,
@@ -91,8 +91,8 @@ class jiocloud::openstack::keystone (
     neutron_internal_address => $neutron_internal_address,
     neutron_admin_address => $neutron_admin_address,
     neutron_public_port => $neutron_public_port,
-    neutron_public_protocol => $os_env::neutron_protocol,
-    neutron_internal_protocol => $os_env::neutron_protocol,
+    neutron_public_protocol => $neutron_protocol,
+    neutron_internal_protocol => $neutron_protocol,
 
     cinder_public_address  => $cinder_public_address,
     cinder_internal_address        => $cinder_internal_address,
@@ -117,7 +117,7 @@ class jiocloud::openstack::keystone (
   }
 
   if $ceph_radosgw_enabled { 
-    class { 'keystone::radosgw':
+    class { '::keystone::radosgw':
       keystone_accepted_roles => $keystone_accepted_roles,
       region                  => $region,
       public_address          => $ceph_radosgw_public_address,
@@ -129,7 +129,7 @@ class jiocloud::openstack::keystone (
     }
   }
  
-  class { 'openstack::auth_file':
+  class { '::openstack::auth_file':
     admin_password  => $admin_password,
     controller_node => $keystone_public_address,
     region_name     => $region,
