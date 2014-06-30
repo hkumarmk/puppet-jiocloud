@@ -1,14 +1,12 @@
 ## Class: jiocloud::ceph::auth
 
-class jiocloud::ceph::auth (
-
-) {
+class jiocloud::ceph::auth {
   
   define add_ceph_auth ( 
-    $ceph_mon_key,
+    $ceph_mon_key = $jiocloud::params::ceph_mon_key,
     $client = $name,
     $file_owner = "root",
-    $keyring = "/etc/ceph/keyring.ceph.client.${client}",
+    $keyring = "/etc/ceph/keyring.ceph.client.${name}",
   ) {
     if $client == "cinder_volume" {
       exec { "exec_add_ceph_auth_${client}":
