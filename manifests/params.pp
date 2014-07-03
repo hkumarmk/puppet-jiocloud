@@ -399,7 +399,6 @@ class jiocloud::params {
   $ceph_radosgw_serveradmin_email       = $admin_email 
   $ceph_radosgw_fastcgi_ext_script      = hiera('jiocloud::ceph::fastcgi_ext_script','/var/www/s3gw.fcgi')
   $ceph_radosgw_socket          = hiera('jiocloud::ceph::radosgw_socket','/var/run/ceph/radosgw.sock')
-  $ceph_radosgw_fastcgi_ext_script_source       = "puppet://modules/jiocloud/ceph/_var_www_s3gw.fcgi"
   $ceph_radosgw_keyring         = '/etc/ceph/keyring.radosgw.gateway'
   $ceph_radosgw_apache_version  = '2.2.22-2precise.ceph'
   $ceph_radosgw_apache_deps     = ['apache2.2-common','apache2.2-bin']
