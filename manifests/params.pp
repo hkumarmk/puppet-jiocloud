@@ -3,8 +3,8 @@
 class jiocloud::params {
   $executable_path	= [ "/bin/", "/sbin/" , "/usr/bin/", "/usr/sbin/", "/usr/local/bin/","/usr/local/sbin/" ]
   
-  $ssl_enabled          = true
-  $multi_url		= true
+  $ssl_enabled          = hiera('jiocloud::ssl_enabled',true)
+  $multi_url		= hiera('jiocloud::multi_url',false)
   $ssl_cert_file_source = "puppet:///modules/jiocloud/ssl/jiocloud.com.crt"
   $ssl_cert_file       	= '/etc/apache2/certs/jiocloud.com.crt'
   $ssl_key_file        	= '/etc/apache2/certs/jiocloud.com.key'
@@ -37,12 +37,12 @@ class jiocloud::params {
   ## network interface configuration
   $compute_fe_interface = hiera('jiocloud::system::compute_fe_interface','eth2')
   $compute_be_interface = hiera('jiocloud::system::compute_be_interface','eth3')
-  $network_device_mtu = hiera('jiocloud::system::network_device_mtu',9000)
+  $network_device_mtu = hiera('jiocloud::system::network_device_mtu',1500)
   ## END network interface configuration
   
   ## resolv.conf: setup resolv.conf 
   $dnsdomainname = hiera('jiocloud::system::dnsdomainname','mu.jio')
-  $dnssearch = hiera('jiocloud::system::dnssearch',[ 'mu.jio' ])
+  $dnssearch = hiera('jiocloud::system::dnssearch',[ $dnsdomainname ])
   $dnsservers = hiera('jiocloud::system::dnsservers',[ '10.135.121.138','10.135.121.107'])
   ## END resolv.conf:
 
