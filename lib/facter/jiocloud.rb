@@ -18,11 +18,11 @@ production =(networks_production & all_network).empty?
 staging =(networks_staging & all_network).empty?
 
 if production == false
-   Facter.add("environment") { setcode { "production" } }
+   Facter.add("env") { setcode { "production" } }
 elsif staging == false 
-   Facter.add("environment") { setcode { "staging" } }
+   Facter.add("env") { setcode { "staging" } }
 else 
-   Facter.add("environment") { setcode { "virtual" } }
+   Facter.add("env") { setcode { "virtual" } }
 end
 
 
