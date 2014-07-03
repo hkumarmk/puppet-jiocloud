@@ -33,7 +33,7 @@ class jiocloud::system::apt (
     $release	= 'precise',
     $mirror_url  = 'UNDEF',
     $my_environment = undef,
-    $environment = ['production','staging'],
+    $environment = ['production','staging','virtualcloud'],
   ) {
     if downcase($my_environment) in downcase($environment) {
       ::apt::source { $name:
