@@ -382,6 +382,9 @@ class jiocloud::params {
 #  $ceph_public_nw_input          = hiera('jiocloud::ceph::ceph_public_network',undef)
   $ceph_radosgw_nodes           = hiera('jiocloud::ceph::radosgw_nodes')
   $ceph_osds 	= hiera('jiocloud::ceph::osds') 
+  $ceph_mon_nodes = hiera('jiocloud::ceph::mon_nodes')
+  $ceph_admin_key = hiera('jiocloud::ceph::admin_key',undef)
+  $ceph_mon_initial_members = hiera('jiocloud::ceph::ceph_mon_initial_members',$ceph_mon_nodes)
   $ceph_mon_config = hiera('jiocloud::ceph::mon_config')
   $ceph_radosgw_public_address = hiera('jiocloud::ceph::radosgw_public_address')
   $ceph_radosgw_internal_address = hiera('jiocloud::ceph::radosgw_internal_address',$ceph_radosgw_public_address)
@@ -397,7 +400,7 @@ class jiocloud::params {
   $ceph_radosgw_fastcgi_ext_script      = hiera('jiocloud::ceph::fastcgi_ext_script','/var/www/s3gw.fcgi')
   $ceph_radosgw_socket          = hiera('jiocloud::ceph::radosgw_socket','/var/run/ceph/radosgw.sock')
   $ceph_radosgw_fastcgi_ext_script_source       = "puppet://modules/jiocloud/ceph/_var_www_s3gw.fcgi"
-#  $ceph_radosgw_keyring         = '/etc/ceph/keyring.radosgw.gateway'
+  $ceph_radosgw_keyring         = '/etc/ceph/keyring.radosgw.gateway'
   $ceph_radosgw_apache_version  = '2.2.22-2precise.ceph'
   $ceph_radosgw_apache_deps     = ['apache2.2-common','apache2.2-bin']
 

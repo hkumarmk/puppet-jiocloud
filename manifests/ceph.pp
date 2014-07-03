@@ -1,14 +1,93 @@
-## Class: jiocloud::openstack::nova
-
-class jiocloud::openstack::nova (
-
-) {
-  if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
-    package { 'ceph-common': ensure	=> 'installed', }
-      add_ceph_auth_cinder_volume {'cinder_volume':
-      file_owner => 'nova',	
-    }
-    add_ceph_auth_mgmt_vm {'mgmt_vm':}
+###Class: jiocloud::ceph
+class jiocloud::ceph (
+  $ceph_pools_to_add
+  $ceph_pool_number_of_pgs
+  $ceph_osds
+  $ceph_radosgw_nodes
+  $ceph_mon_nodes
+  $iam_compute_node = $jiocloud::params::iam_compute_node,
+  $iam_os_controller_node = $jiocloud::params::iam_os_controller_node,
+  $ceph_mon_initial_members
+  $ceph_fsid
+  $ceph_auth_type
+  $ceph_storage_cluster_network
+  $ceph_public_network
+  $ceph_osd_journal_type
+  $ceph_mon_key
+  $ceph_mon_port
+  $ceph_mon_ip
+  $ceph_public_address
+  $ceph_cluster_address
+  $ceph_osd_journal_type
+  $ceph_osd_journal_size
+)
+{ 
+  ##
+  $st_sysctl_settings = {
+  "vm.dirty_background_ratio"          => { value => 5 },
   }
-   
+
+
+  ##### Conditional application of role based classes
+
+  file {'/etc/ceph':
+    ensure => directory,
+  }
+
+  if downcase($hostname) in downcase($ceph_mon_nodes) {
+    ::ceph::mon { downcase($hostname):
+      monitor_secret => $ceph_mon_key,
+      mon_port       => $ceph_mon_port,
+      mon_addr       => $ceph_mon_ip,
+    }
+    add_ceph_auth {'admin': }
+    add_ceph_pools { $ceph_pools_to_add: num_pgs => $ceph_pool_number_of_pgs,  }
+  }
+
+  if downcase($hostname) in downcase($ceph_radosgw_nodes) {
+    class { 'jiocloud::ceph::radosgw': }
+  }
+  
+  if is_hash($ceph_osds) {
+    create_resources(add_ceph_osd,$ceph_osds)
+  }
+  
+  if $iam_compute_node or $iam_os_controller_node or $iam_storage_node {
+    class { 'jiocloud::ceph::config': }
+  }
+  
+  if $iam_storage_node {
+    create_resources(sysctl::value,$st_sysctl_settings)	
+  }
+
+  define add_ceph_pools (
+    $num_pgs,
+  ) {
+    exec { "add_ceph_pool_${name}":
+      command	=> "ceph osd pool create $name $num_pgs",
+      unless	=> "ceph osd lspools | grep \"\\<[0-9][0-9]* *$name\\>\""
+    }
+  }
+
+  define add_ceph_osd ($disks) {
+    if $name == $hostname {
+      class { '::ceph::osd' :
+	public_address => $ceph_public_address,
+	cluster_address => $ceph_cluster_address,
+      }
+      add_osds { $disks: }
+    }
+  }
+
+  define add_osds {
+    ::ceph::osd::device { $name: 
+      osd_journal_type 	=> $ceph_osd_journal_type,
+      osd_journal_size 	=> $ceph_osd_journal_size,
+    }
+  }
+
+  ## End of ceph_setup
 }
+
+
+  
