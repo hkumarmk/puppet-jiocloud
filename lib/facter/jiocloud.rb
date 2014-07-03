@@ -22,7 +22,7 @@ if production == false
 elsif staging == false 
    Facter.add("env") { setcode { "staging" } }
 else 
-   Facter.add("env") { setcode { "virtual" } }
+   Facter.add("env") { setcode { "virtualcloud" } }
 end
 
 
