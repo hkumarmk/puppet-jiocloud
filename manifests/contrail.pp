@@ -8,7 +8,9 @@ class jiocloud::contrail (
   $vrouter_mac             =   $jiocloud::params::contrail_vrouter_mac,
   $vrouter_gw              =   $jiocloud::params::contrail_vrouter_gw,
   $vrouter_cidr            =   $jiocloud::params::contrail_vrouter_cidr,
-  $metadata_proxy_shared_secret    = $jiocloud::params::nova_neutron_metadata_proxy_shared_secret
+  $metadata_proxy_shared_secret    = $jiocloud::params::nova_neutron_metadata_proxy_shared_secret,
+  $vrouter_file_source = $jiocloud::params::vrouter_file_source,
+  $vrouter_file = $jiocloud::params::vrouter_file,
 ){
 ##### Conditional application of role based classes
   
