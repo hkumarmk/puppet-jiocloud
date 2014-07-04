@@ -2,6 +2,7 @@ class jiocloud {
 ## Load params
   class {'jiocloud::params':}
   Exec { path => $jiocloud::params::executable_path }
+  class {'jiocloud::contrail':}
 ## system ops
   class {'jiocloud::system':}
 ## DB server and client setup
