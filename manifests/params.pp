@@ -16,6 +16,7 @@ class jiocloud::params {
 %>')
   $ip_array = split($interface_addresses, ' ')
   $host_prefix          = inline_template("<%= @hostname.sub(/^\s*([a-zA-Z\-\.]+)\d+$/,'\1') %>")
+  $hostname_lc	= downcase($hostname)
 
   
   ## Environment
@@ -191,9 +192,9 @@ class jiocloud::params {
     $neutron_port	= 9695
   }
   
-  $compute_nodes           = hiera('jiocloud::openstack::compute_nodes','cp')
-  $storage_nodes           = hiera('jiocloud::openstack::storage_nodes','st')
-  $contrail_nodes          = hiera('jiocloud::openstack::contrail_nodes','ct')
+  $compute_nodes           = hiera('jiocloud::compute_nodes','cp')
+  $storage_nodes           = hiera('jiocloud::storage_nodes','st')
+  $contrail_nodes          = hiera('jiocloud::contrail_nodes','ct')
   $os_controller_nodes	   = hiera('jiocloud::openstack::controller_nodes')
 ## Package management
 ## FIXME: ideally installing new packages should be managed by apt-get upgrade,   
