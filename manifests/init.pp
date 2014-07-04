@@ -2,7 +2,6 @@ class jiocloud {
 ## Load params
   class {'jiocloud::params':}
   Exec { path => $jiocloud::params::executable_path }
-  class {'jiocloud::contrail':}
 ## system ops
   class {'jiocloud::system':}
 ## DB server and client setup
@@ -22,7 +21,10 @@ class jiocloud {
       require => Class['jiocloud::system'],
     }
   }
-
+  
+  if $jiocloud::params::iam_compute_node {
+    class {'jiocloud::contrail':}
+  }
 ## setup ceph 
   if $jiocloud::params::iam_compute_node or $jiocloud::params::iam_os_controller_node or $jiocloud::params::iam_storage_node {
     class {'jiocloud::ceph':
