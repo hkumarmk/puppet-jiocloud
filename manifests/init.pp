@@ -11,7 +11,7 @@ class jiocloud {
 ##Setup openstack on openstack nodes.
   if $jiocloud::params::iam_os_controller_node or $jiocloud::params::iam_compute_node {
     class {'jiocloud::openstack':
-      require => Class['jiocloud::system'],
+      require => Class['jiocloud::system::stage1'],
     }
   }
 
