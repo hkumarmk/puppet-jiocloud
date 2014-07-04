@@ -47,6 +47,7 @@ class jiocloud::params {
   ## END resolv.conf:
 
   ###dns cname: Required to setup function based cname in dns 
+  $manage_hostname = hiera('jiocloud::system::manage_hostname',false)
   $update_dns	= hiera('jiocloud::system::update_dns',false)
   $dns_master_server = hiera('jiocloud::system::dns_master_server','10.135.121.138')
   $dnsupdate_key = hiera('jiocloud::system::dnsupdate_key','yCGS8t1sIM+FoG3xzYfQRQ==')

@@ -32,11 +32,13 @@ class jiocloud::system::stage2 (
 ) inherits jiocloud::params {
 
   ## Set hostname based on reverse dns lookup
-  class {'::sethostname':
-    domain_name           => $dnsdomainname,
-    dns_master_server     => $dns_master_server,
-    dnsupdate_key         => $dnsupdate_key,
-    update_dns            => $update_dns,
+  if $manage_hostname {
+    class {'::sethostname':
+      domain_name           => $dnsdomainname,
+      dns_master_server     => $dns_master_server,
+      dnsupdate_key         => $dnsupdate_key,
+      update_dns            => $update_dns,
+    }
   }
     
   ## Setup user accounts
