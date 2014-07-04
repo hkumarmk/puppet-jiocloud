@@ -30,7 +30,7 @@ class jiocloud::ceph::radosgw (
   file {'/etc/apache2/certs/':
     ensure => directory,
   }
-  class { 'ceph::radosgw':
+  class { '::ceph::radosgw':
     serveradmin_email	=> $ceph_radosgw_serveradmin_email,
     fastcgi_ext_script	=> $ceph_radosgw_fastcgi_ext_script,
     socket			=> $ceph_radosgw_socket,	
