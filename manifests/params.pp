@@ -411,8 +411,22 @@ class jiocloud::params {
 
   $ceph_pools_to_add            = [ $ceph_pool_cinder_volume, $ceph_pool_cinder_backup, $ceph_pool_glance_image ]
   $ceph_pool_number_of_pgs      = hiera('jiocloud::ceph::number_of_pgs',128)
+
+  if (is_array($compute_nodes) and $hostname in $compute_nodes)  or ($compute_nodes and $compute_nodes == $host_prefix) {
+    $iam_compute_node = true
+  }
+  if (is_array($os_controller_nodes) and $hostname in $os_controller_nodes)  or ($os_controller_nodes and $os_controller_nodes == $host_prefix) {
+    $iam_os_controller_node = true
+  }
+  if (is_array($storage_nodes) and $hostname in $storage_nodes)  or ($storage_nodes and $storage_nodes == $host_prefix) {
+    $iam_storage_node = true
+  }
+  $iam_memcached_node = inline_template("<%= !(@ip_array & @memcached_nodes_address).empty? %>")
+  $iam_ntpserver_node = inline_template("<%= !(@ip_array & @ntp_servers).empty? %>")
+
  
   ##FIXME: Currently only ceph_storage_cluster_interface and ceph_public_interface is supported, 
+  if $iam_storage_node {
   if $ceph_storage_cluster_interface {
     $ceph_storage_cluster_nw = inline_template("<%= scope.lookupvar('network_' + @ceph_storage_cluster_interface) %>")
     $ceph_storage_cluster_cidr = inline_template("<%= scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
@@ -435,19 +449,7 @@ class jiocloud::params {
   $ceph_public_address          = inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_public_interface) %>")
   $ceph_mon_ip			= $ceph_public_address
   $ceph_cluster_address		= inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_storage_cluster_interface) %>")
-
-   if (is_array($compute_nodes) and $hostname in $compute_nodes)  or ($compute_nodes and $compute_nodes == $host_prefix) {
-    $iam_compute_node = true
-  } 
-  if (is_array($os_controller_nodes) and $hostname in $os_controller_nodes)  or ($os_controller_nodes and $os_controller_nodes == $host_prefix) {
-    $iam_os_controller_node = true
   }
-  if (is_array($storage_nodes) and $hostname in $storage_nodes)  or ($storage_nodes and $storage_nodes == $host_prefix) {
-    $iam_storage_node = true
-  }
-  $iam_memcached_node = inline_template("<%= !(@ip_array & @memcached_nodes_address).empty? %>")
-  $iam_ntpserver_node = inline_template("<%= !(@ip_array & @ntp_servers).empty? %>")
-
   $nova_db_url = "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8"
   $keystone_db_url = "mysql://${keystone_db_user}:${keystone_db_password}@${db_host_ip}/${keystone_db_name}?charset=utf8"
   $cinder_db_url = "mysql://${cinder_db_user}:${cinder_db_password}@${db_host_ip}/${cinder_db_name}?charset=utf8"
