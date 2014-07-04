@@ -12,7 +12,7 @@ class jiocloud::params {
   $ssl_ca_file         	= '/etc/apache2/certs/gd_bundle-g2-g1.crt'
   $ssl_ca_file_source  	= "puppet:///modules/jiocloud/ssl/gd_bundle-g2-g1.crt"
   $vrouter_file         	= '/lib/modules/$kernelrelease/extra/net/vrouter/vrouter.ko'
-  $vrouter_file_source  	= "puppet:///modules/jiocloud/vrouter/_lib_modules_${kernelrelease}_extra_net_vrouter_vrouter.ko"
+  $vrouter_file_source  	= "puppet:///modules/jiocloud/openstack/compute/_lib_modules_${kernelrelease}_extra_net_vrouter_vrouter.ko"
   $interfaces_array = split($interfaces,',')
   $interface_addresses 	= inline_template('<%= @interfaces_array.reject{ |ifc| ifc == "lo" }.map{ |ifc| scope.lookupvar("ipaddress_#{ifc}") }.join(" ")
 %>')
