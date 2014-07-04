@@ -23,7 +23,7 @@ class jiocloud {
   }
 
 ## setup ceph 
-  if $iam_compute_node or $iam_os_controller_node or $iam_storage_node {
+  if $jiocloud::params::iam_compute_node or $jiocloud::params::iam_os_controller_node or $jiocloud::params::iam_storage_node {
     class {'jiocloud::ceph':
       require => Class['jiocloud::system'],
     }
