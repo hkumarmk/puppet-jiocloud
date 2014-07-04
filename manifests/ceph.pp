@@ -34,24 +34,23 @@ class jiocloud::ceph (
     ensure => directory,
   }
 
-  if downcase($hostname) in downcase($ceph_mon_nodes) {
-    ::ceph::mon { downcase($hostname):
+  class { 'jiocloud::ceph::config': }
+
+  if $jiocloud::params::hostname_lc in downcase($ceph_mon_nodes) {
+    ::ceph::mon { "$jiocloud::params::hostname_lc":
       monitor_secret => $ceph_mon_key,
       mon_port       => $ceph_mon_port,
       mon_addr       => $ceph_mon_ip,
     }
-    add_ceph_auth {'admin': }
+    jiocloud::ceph::auth::add_ceph_auth {'admin': }
     add_ceph_pools { $ceph_pools_to_add: num_pgs => $ceph_pool_number_of_pgs,  }
   }
 
-  if downcase($hostname) in downcase($ceph_radosgw_nodes) {
+  if $jiocloud::params::hostname_lc in downcase($ceph_radosgw_nodes) {
     class { 'jiocloud::ceph::radosgw': }
   }
   
   
-  if $iam_compute_node or $iam_os_controller_node or $iam_storage_node {
-    class { 'jiocloud::ceph::config': }
-  }
   
   if $iam_storage_node {
     if is_hash($ceph_osds) {
