@@ -15,6 +15,7 @@ class jiocloud::openstack::nova::compute (
   $nova_physical_volumes = $jiocloud::params::nova_physical_volumes,
   $nova_logical_volume = $jiocloud::params::nova_logical_volume,
   $cinder_rbd_secret_uuid = $jiocloud::params::cinder_rbd_secret_uuid,
+  $nova_db_url = $jiocloud::params::nova_db_url,
 ) {
   package { 'ceph-common':
     ensure  => 'installed',
@@ -30,7 +31,7 @@ class jiocloud::openstack::nova::compute (
   class { 'nova::scheduler': enabled	=> false, }	
   
   class { '::nova':
-    database_connection     => "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8",
+    database_connection     => "mysql://${nova_db_user}:${nova_db_password}@${nova_db_url}/${nova_db_name}?charset=utf8",
     rpc_backend             => $nova_rpc_backend,
     glance_api_servers      => $nova_glance_api_servers,
     glance_protocol         => $glance_protocol,
