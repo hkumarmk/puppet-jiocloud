@@ -345,11 +345,11 @@ class jiocloud::params {
   ### Starting with standalone memcached; multi node memcached cluster tobe setup for scaleout and reliability
 
 
-  $memcached_nodes		= hiera('jiocloud::openstack::memcached_nodes',$md_memcached_nodes)
-  $memcached_listen = hiera('jiocloud::openstack::memcached_listen','0.0.0.0')
-  $memcached_port = hiera('jiocloud::openstack::memcached_port','11211')
-  $memcached_max_memory = hiera('jiocloud::openstack::memcached_max_memory',5120)
-  $memcached_server_url = [inline_template('<% @memcached_nodes.each do | mc | @mc_url = "#@mc_url #{mc}:#@memcached_port," %> <% end %> <%= @mc_url.gsub(/^ */,"").gsub(/, *$/,"") %> ')]
+  $memcached_nodes_address		= hiera('jiocloud::memcached::nodes_address')
+  $memcached_listen = hiera('jiocloud::memcached::listen_address','0.0.0.0')
+  $memcached_port = hiera('jiocloud::memcached::listen_port','11211')
+  $memcached_max_memory = hiera('jiocloud::memcached::max_memory',5120)
+  $memcached_server_url = [inline_template('<% @memcached_nodes_address.each do | mc | @mc_url = "#@mc_url #{mc}:#@memcached_port," %> <% end %> <%= @mc_url.gsub(/^ */,"").gsub(/, *$/,"") %> ')]
 
   $horizon_secret_key           = $service_user_password
   $horizon_api_result_limit     = hiera('jiocloud::openstack::horizon_api_result_limit',2000)
@@ -440,6 +440,7 @@ class jiocloud::params {
   if (is_array($storage_nodes) and $hostname in $storage_nodes)  or ($storage_nodes and $storage_nodes == $host_prefix) {
     $iam_storage_node = true
   }
+  $iam_memcached_node = inline_template("<%= !(@ip_array & @memcached_nodes_address).empty? %>")
 
   $nova_db_url = "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8"
   $keystone_db_url = "mysql://${keystone_db_user}:${keystone_db_password}@${db_host_ip}/${keystone_db_name}?charset=utf8"
