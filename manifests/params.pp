@@ -75,11 +75,12 @@ class jiocloud::params {
         $contrail_vrouter_nw_last_oct   = inline_template("<%= scope.lookupvar('network_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4').to_i %>")
         $contrail_vrouter_nw_first_ip   = $contrail_vrouter_nw_last_oct + 1
         $contrail_vrouter_gw = "${contrail_vrouter_nw_first_three}.${contrail_vrouter_nw_first_ip}"
-        $contrail_vrouter_cidr1 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr2 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr3 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr4 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr = $contrail_vrouter_cidr1 + $contrail_vrouter_cidr2 + $contrail_vrouter_cidr3 + $contrail_vrouter_cidr4
+#        $contrail_vrouter_cidr1 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size  %>")
+#        $contrail_vrouter_cidr2 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size  %>")
+#        $contrail_vrouter_cidr3 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size  %>")
+#        $contrail_vrouter_cidr4 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
+#        $contrail_vrouter_cidr = $contrail_vrouter_cidr1 + $contrail_vrouter_cidr2 + $contrail_vrouter_cidr3 + $contrail_vrouter_cidr4
+	$contrail_vrouter_cidr = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
      } else {
         $contrail_vrouter_ip          = inline_template("<%= scope.lookupvar('ipaddress_' + @contrail_vrouter_interface) %>")
         $contrail_vrouter_netmask     = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface) %>")
@@ -414,17 +415,20 @@ class jiocloud::params {
  
   ##FIXME: Currently only ceph_storage_cluster_interface and ceph_public_interface is supported, 
   if $ceph_storage_cluster_interface {
-    $ceph_storage_cluster_network = inline_template("<%= scope.lookupvar('network_' + @ceph_storage_cluster_interface) %>")
+    $ceph_storage_cluster_nw = inline_template("<%= scope.lookupvar('network_' + @ceph_storage_cluster_interface) %>")
+    $ceph_storage_cluster_cidr = inline_template("<%= scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_storage_cluster_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
+   $ceph_storage_cluster_network = "${ceph_storage_cluster_nw}/${ceph_storage_cluster_cidr}"
   } elsif $ceph_storage_cluster_nw_input {
     $ceph_storage_cluster_network = $ceph_storage_cluster_nw_input
   } else {
     fail ('Errr: either of jiocloud::ceph::storage_cluster_interface or jiocloud::ceph::storage_cluster_network must be set')
   }
- 
   if $ceph_public_interface {
-    $ceph_public_network = inline_template("<%= scope.lookupvar('network_' + @ceph_public_interface) %>")
+    $ceph_public_nw = inline_template("<%= scope.lookupvar('network_' + @ceph_public_interface) %>")
+    $ceph_public_cidr = inline_template("<%= scope.lookupvar('netmask_' + @ceph_public_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_public_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_public_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @ceph_public_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
+   $ceph_public_network = "${ceph_public_nw}/${ceph_public_cidr}"
   } elsif $ceph_public_nw_input {
-    $ceph_public_network = $ceph_public_nw_input
+    $ceph_storage_cluster_network = $ceph_storage_cluster_nw_input
   } else {
     fail ('Errr: either of jiocloud::ceph::ceph_public_interface or jiocloud::ceph::ceph_public_network must be set')
   } 
