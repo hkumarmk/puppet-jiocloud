@@ -53,7 +53,7 @@ class jiocloud::ceph (
   
   if $iam_storage_node {
     if is_hash($ceph_osds) {
-      create_resources(add_ceph_osd,$ceph_osds)
+      create_resources(add_ceph_osd,$ceph_osds,{osd_journal_type => $ceph_osd_journal_type, osd_journal_size => $ceph_osd_journal_size, public_address => $ceph_public_address, cluster_address => $ceph_cluster_address})
     }
     create_resources(sysctl::value,$st_sysctl_settings)	
   }
@@ -67,23 +67,38 @@ class jiocloud::ceph (
     }
   }
 
-  define add_ceph_osd ($disks) {
+  define add_ceph_osd (
+    $disks,
+    $public_address = $ceph_public_address,
+    $cluster_address = $ceph_cluster_address,
+    $osd_journal_type = $ceph_osd_journal_type,
+    $osd_journal_size  = $ceph_osd_journal_size,
+) {
     if $name == $hostname {
       class { '::ceph::osd' :
-	public_address => $ceph_public_address,
-	cluster_address => $ceph_cluster_address,
+	public_address => $public_address,
+	cluster_address => $cluster_address,
       }
-      add_osds { $disks: }
+      add_osds { $disks: 
+  	osd_journal_type => $osd_journal_type,
+	osd_journal_size  => $osd_journal_size
+      }
     }
   }
-
-  define add_osds {
+  define add_osds (
+    $osd_journal_type,
+    $osd_journal_size,
+  ) {
     ::ceph::osd::device { $name: 
-      osd_journal_type 	=> $ceph_osd_journal_type,
-      osd_journal_size 	=> $ceph_osd_journal_size,
+      osd_journal_type 	=> $osd_journal_type,
+      osd_journal_size 	=> $osd_journal_size,
     }
   }
 
+## Running ceph::key with fake secret with admin just to satisfy condition in ceph module
+  ::ceph::key { 'admin':
+          secret       => 'AQCNhbZTCKXiGhAAWsXesOdPlNnUSoJg7BZvsw==',
+        }
   ## End of ceph_setup
 }
 
