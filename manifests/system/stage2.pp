@@ -29,7 +29,7 @@ class jiocloud::system::stage2 (
   $all_nodes_services_to_run = $jiocloud::params::all_nodes_services_to_run,
   $ntp_server_servers = $jiocloud::params::ntp_server_servers,
   $ntp_servers = $jiocloud::params::ntp_servers,
-) {
+) inherits jiocloud::params {
 
   ## Set hostname based on reverse dns lookup
   class {'::sethostname':
