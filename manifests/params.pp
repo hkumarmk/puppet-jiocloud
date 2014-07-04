@@ -11,6 +11,8 @@ class jiocloud::params {
   $ssl_key_file_source 	= "puppet:///modules/jiocloud/ssl/jiocloud.com.key"
   $ssl_ca_file         	= '/etc/apache2/certs/gd_bundle-g2-g1.crt'
   $ssl_ca_file_source  	= "puppet:///modules/jiocloud/ssl/gd_bundle-g2-g1.crt"
+  $vrouter_file         	= '/lib/modules/$kernelrelease/extra/net/vrouter/vrouter.ko'
+  $vrouter_file_source  	= "puppet:///modules/jiocloud/vrouter/_lib_modules_${kernelrelease}_extra_net_vrouter_vrouter.ko"
   $interfaces_array = split($interfaces,',')
   $interface_addresses 	= inline_template('<%= @interfaces_array.reject{ |ifc| ifc == "lo" }.map{ |ifc| scope.lookupvar("ipaddress_#{ifc}") }.join(" ")
 %>')
@@ -75,13 +77,9 @@ class jiocloud::params {
         $contrail_vrouter_nw_last_oct   = inline_template("<%= scope.lookupvar('network_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4').to_i %>")
         $contrail_vrouter_nw_first_ip   = $contrail_vrouter_nw_last_oct + 1
         $contrail_vrouter_gw = "${contrail_vrouter_nw_first_three}.${contrail_vrouter_nw_first_ip}"
-#        $contrail_vrouter_cidr1 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size  %>")
-#        $contrail_vrouter_cidr2 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size  %>")
-#        $contrail_vrouter_cidr3 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size  %>")
-#        $contrail_vrouter_cidr4 = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
-#        $contrail_vrouter_cidr = $contrail_vrouter_cidr1 + $contrail_vrouter_cidr2 + $contrail_vrouter_cidr3 + $contrail_vrouter_cidr4
 	$contrail_vrouter_cidr = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
      } else {
+	$contrail_vrouter_interface = $compute_fe_interface
         $contrail_vrouter_ip          = inline_template("<%= scope.lookupvar('ipaddress_' + @contrail_vrouter_interface) %>")
         $contrail_vrouter_netmask     = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface) %>")
 #       $contrail_vrouter_gw     = inline_template("<%= scope.lookupvar('network_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1.\2.\3.'+\4+1) %>")
@@ -89,12 +87,13 @@ class jiocloud::params {
         $contrail_vrouter_nw_last_oct   = inline_template("<%= scope.lookupvar('network_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4').to_i %>")
         $contrail_vrouter_nw_first_ip   = $contrail_vrouter_nw_last_oct + 1
         $contrail_vrouter_gw = "${contrail_vrouter_nw_first_three}.${contrail_vrouter_nw_first_ip}"
-        $contrail_vrouter_cidr1 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr2 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr3 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr4 = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
-        $contrail_vrouter_cidr = $contrail_vrouter_cidr1 + $contrail_vrouter_cidr2 + $contrail_vrouter_cidr3 + $contrail_vrouter_cidr4
-
+    	$contrail_vrouter_cidr = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>"
+         $contrail_discovery_server    = hiera('jiocloud::contrail::discovery::server','10.1.0.16')
+	 $contrail_vrouter_num_controllers = hiera('jiocloud::contrail::vrouter_num_controller',2)         # Number of controllers the vrouter can connect - 1 or 2
+         $contrail_vrouter_mac         = inline_template("<%= scope.lookupvar('macaddress_' + @contrail_vrouter_interface) %>")
+#FIXME: This array to be implemented
+         $contrail_static_route_vhost0 = hiera('jiocloud::contrail::static_route_vhost0')
+         $contrail_mx_address          = hiera('jiocloud::contrail::mx_addr','10.204.84.26')
     }
   }
 
