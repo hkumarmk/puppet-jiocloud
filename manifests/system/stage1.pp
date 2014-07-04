@@ -26,6 +26,7 @@ class jiocloud::system::stage1 (
   ## Apt source and mirror setup
   class { 'jiocloud::system::apt': 
     require => Resolv_conf['resolv_mu'],
+    before => Class['jiocloud::openstack']
   }
 
 }
