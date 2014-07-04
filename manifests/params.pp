@@ -441,6 +441,7 @@ class jiocloud::params {
     $iam_storage_node = true
   }
   $iam_memcached_node = inline_template("<%= !(@ip_array & @memcached_nodes_address).empty? %>")
+  $iam_ntpserver_node = inline_template("<%= !(@ip_array & @ntp_servers).empty? %>")
 
   $nova_db_url = "mysql://${nova_db_user}:${nova_db_password}@${db_host_ip}/${nova_db_name}?charset=utf8"
   $keystone_db_url = "mysql://${keystone_db_user}:${keystone_db_password}@${db_host_ip}/${keystone_db_name}?charset=utf8"

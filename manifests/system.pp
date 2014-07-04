@@ -71,7 +71,7 @@ class jiocloud::system (
   }
 
   ## Setup ntp servers
-  if $hostname in $ntp_servers {
+  if $jiocloud::params::iam_ntpserver_node == 'true' {
     class { '::ntp': servers => $ntp_server_servers, }
   } else {
     class {'::ntp': servers => $ntp_servers, }
