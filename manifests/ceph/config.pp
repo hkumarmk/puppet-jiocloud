@@ -4,10 +4,15 @@ class jiocloud::ceph::config (
   $ceph_mon_config = $jiocloud::params::ceph_mon_config,
   $ceph_admin_key = $jiocloud::params::ceph_admin_key,
   $ceph_keyring  = $jiocloud::params::ceph_keyring,
+  $ceph_fsid  = $jiocloud::params::ceph_fsid,
+  $ceph_auth_type  = $jiocloud::params::ceph_auth_type,
+  $ceph_storage_cluster_network  = $jiocloud::params::ceph_storage_cluster_network,
+  $ceph_public_network = $jiocloud::params::ceph_public_network,
+  $ceph_osd_journal_type   = $jiocloud::params::ceph_osd_journal_type,
 ) {
     $ceph_mon_initial_members_str = join($ceph_mon_initial_members,',')
     class { '::ceph::conf':
-      fsid            => $::ceph_fsid,
+      fsid            => $ceph_fsid,
       auth_type       => $ceph_auth_type,
       cluster_network => $ceph_storage_cluster_network,
       public_network  => $ceph_public_network,
