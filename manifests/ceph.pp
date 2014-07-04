@@ -6,6 +6,7 @@ class jiocloud::ceph (
   $ceph_radosgw_nodes = $jiocloud::params::ceph_radosgw_nodes,
   $ceph_mon_nodes = $jiocloud::params::ceph_mon_nodes,
   $iam_compute_node = $jiocloud::params::iam_compute_node,
+  $iam_storage_node = $jiocloud::params::iam_storage_node,
   $iam_os_controller_node = $jiocloud::params::iam_os_controller_node,
   $ceph_mon_initial_members = $jiocloud::params::ceph_mon_initial_members,
   $ceph_fsid = $jiocloud::params::ceph_fsid,
@@ -49,8 +50,6 @@ class jiocloud::ceph (
   if $jiocloud::params::hostname_lc in downcase($ceph_radosgw_nodes) {
     class { 'jiocloud::ceph::radosgw': }
   }
-  
-  
   
   if $iam_storage_node {
     if is_hash($ceph_osds) {
