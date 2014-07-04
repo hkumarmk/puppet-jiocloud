@@ -32,7 +32,7 @@ class jiocloud::system (
 ) inherits jiocloud::params {
 
   ### Set resolv.conf
-  import "resolver"
+  include "resolver"
   resolv_conf { "resolv_mu":
     domainname  => $dnsdomainname,
     searchpath  => $dnssearch,
@@ -80,6 +80,7 @@ class jiocloud::system (
   ### Installing base packages required on all servers
   package { $all_nodes_pkgs_to_install:
     ensure => installed,
+    require => Class['jiocloud::system::apt'],
   }
 
   ### Remove unwanted packages
