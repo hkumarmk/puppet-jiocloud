@@ -143,6 +143,7 @@ class jiocloud::params {
   if $ssl_enabled {
     $http_protocol = 'https'
     $glance_registry_listen_port  = 19191
+    $metadata_listen_port	= 18775
     $glance_api_listen_port       = 19292
     $keystone_public_listen_port  = 15000
     $keystone_admin_listen_port   = 35358
@@ -162,6 +163,7 @@ class jiocloud::params {
     $nova_vncproxy_listen_port    = 6080
     $nova_osapi_compute_listen_port = 8774
     $nova_ec2_listen_port         = 8773
+    $metadata_listen_port       = 8775
     $multi_url_port = 80
     $service_listen_address = '0.0.0.0'
   }
@@ -190,6 +192,7 @@ class jiocloud::params {
     $glance_port        = 9292
     $cinder_port        = 8776
     $neutron_port	= 9695
+    
   }
   
   $compute_nodes           = hiera('jiocloud::compute_nodes','cp')
