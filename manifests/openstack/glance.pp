@@ -8,7 +8,7 @@ class jiocloud::openstack::glance (
   $debug = $jiocloud::params::debug,
   $registry_host = $jiocloud::params::glance_public_address,
   $registry_protocol = $jiocloud::params::glance_protocol,
-  $registry_bind_port = $jiocloud::params::registry_bind_port,
+  $registry_bind_port = $jiocloud::params::glance_registry_listen_port,
   $keystone_port = $jiocloud::params::keystone_port,
   $keystone_host = $jiocloud::params::keystone_internal_address,
   $keystone_protocol = $jiocloud::params::keystone_protocol,
