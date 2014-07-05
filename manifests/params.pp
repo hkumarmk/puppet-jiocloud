@@ -151,6 +151,7 @@ class jiocloud::params {
     $nova_vncproxy_listen_port    = 16080
     $nova_osapi_compute_listen_port   = 18774
     $nova_ec2_listen_port = 18773
+    $ceph_radosgw_listen_port = 443
     $multi_url_port = 443
     $service_listen_address = '127.0.0.1'
   } else {
@@ -164,6 +165,7 @@ class jiocloud::params {
     $nova_osapi_compute_listen_port = 8774
     $nova_ec2_listen_port         = 8773
     $metadata_listen_port       = 8775
+    $ceph_radosgw_listen_port = 80 
     $multi_url_port = 80
     $service_listen_address = '0.0.0.0'
   }
@@ -174,6 +176,7 @@ class jiocloud::params {
     $glance_port	= $multi_url_port
     $cinder_port	= $multi_url_port
     $neutron_port	= $multi_url_port
+    $ceph_radosgw_port  = $multi_url_port
     $nova_public_address       = hiera('jiocloud::openstack::nova_public_address')
     $keystone_public_address	= hiera('jiocloud::openstack::keystone_public_address')
     $cinder_public_address       = hiera('jiocloud::openstack::cinder_public_address')
@@ -181,18 +184,20 @@ class jiocloud::params {
     $object_storage_public_address = hiera('jiocloud::ceph::radosgw_public_address')
     $neutron_public_address      = hiera('jiocloud::openstack::nova_public_address')
     $horizon_public_address	= hiera('jiocloud::openstack::horizon_public_address')
+    $ceph_radosgw_public_address = hiera('jiocloud::openstack::radosgw_public_address')
   } else {
     $public_address = hiera('jiocloud::public_address')
     $keystone_public_address      = $public_address
     $nova_public_address       = $public_address
     $cinder_public_address       = $public_address
     $glance_public_address       = $public_address
+    $ceph_radosgw_public_address = $public_address 
     $keystone_port      = 5000
     $nova_port          = 8774
     $glance_port        = 9292
     $cinder_port        = 8776
     $neutron_port	= 9695
-    
+    $ceph_radosgw_port  = 8143
   }
   
   $compute_nodes           = hiera('jiocloud::compute_nodes','cp')
@@ -367,15 +372,6 @@ class jiocloud::params {
   $nova_snapshot_image_format = hiera('jiocloud::openstack::nova_snapshot_image_format','qcow2')
 
 ## Ceph params
-  if $ssl_enabled {
-    $ceph_radosgw_listen_ssl      = true
-    $ceph_radosgw_protocol	= 'https'
-    $ceph_radosgw_public_port     = 443
-  } else {
-    $ceph_radosgw_listen_ssl      = false
-    $ceph_radosgw_protocol	= 'http'
-    $ceph_radosgw_public_port     = 80
-  } 
   $ceph_auth_type               = hiera('jiocloud::ceph::auth_type','cephx')
   $ceph_mon_port                = hiera('jiocloud::ceph::mon_port','6789')
 
@@ -391,7 +387,6 @@ class jiocloud::params {
   $ceph_admin_key = hiera('jiocloud::ceph::admin_key',undef)
   $ceph_mon_initial_members = hiera('jiocloud::ceph::ceph_mon_initial_members',$ceph_mon_nodes)
   $ceph_mon_config = hiera('jiocloud::ceph::mon_config')
-  $ceph_radosgw_public_address = hiera('jiocloud::ceph::radosgw_public_address')
   $ceph_radosgw_internal_address = hiera('jiocloud::ceph::radosgw_internal_address',$ceph_radosgw_public_address)
   $ceph_radosgw_admin_address = hiera('jiocloud::ceph::radosgw_admin_address',$ceph_radosgw_internal_address)
 
