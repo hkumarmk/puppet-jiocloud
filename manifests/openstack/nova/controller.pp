@@ -120,7 +120,6 @@ class jiocloud::openstack::nova::controller (
     auth_host			=> $keystone_internal_address,
     osapi_compute_listen_port	=> $nova_osapi_compute_listen_port,
     api_bind_address		=> $service_listen_address,
-    metadata_listen		=> $service_listen_address,
     ec2_listen_port		=> $nova_ec2_listen_port,
     auth_protocol		=> $keystone_protocol,
     auth_strategy		=> 'keystone',
