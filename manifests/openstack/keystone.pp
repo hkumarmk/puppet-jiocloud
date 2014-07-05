@@ -48,8 +48,9 @@ class jiocloud::openstack::keystone (
   $ceph_radosgw_admin_address = $jiocloud::params::ceph_radosgw_admin_address,
   $ceph_radosgw_internal_address = $jiocloud::params::ceph_radosgw_internal_address,
   $ceph_radosgw_protocol = $jiocloud::params::ceph_radosgw_protocol,
-  $ceph_radosgw_public_address = $jiocloud::params::object_storage_public_address,
-  $ceph_radosgw_public_port = $jiocloud::params::ceph_radosgw_public_port,
+  $ceph_radosgw_public_address = $jiocloud::params::ceph_radosgw_public_address,
+  $ceph_radosgw_port = $jiocloud::params::ceph_radosgw_port,
+  $ceph_radosgw_enabled = $jiocloud::params::ceph_radosgw_enabled,
   $keystone_accepted_roles = $jiocloud::params::keystone_accepted_roles,
   $keystone_admin_port = $jiocloud::params::keystone_admin_port,
   $keystone_protocol = $jiocloud::params::keystone_protocol,
@@ -57,6 +58,8 @@ class jiocloud::openstack::keystone (
   $keystone_public_port = $jiocloud::params::keystone_public_port,
   $keystone_version = $jiocloud::params::keystone_version,
   $region = $jiocloud::params::region,
+  $service_listen_address = $jiocloud::params::service_listen_address,
+
 ) {
   class { '::openstack::keystone':
     db_host => $db_host_ip,
@@ -64,6 +67,7 @@ class jiocloud::openstack::keystone (
     admin_token => $admin_token,
     admin_email           	=> $admin_email,
     admin_password        	=> $admin_password,
+    bind_host 		=> $service_listen_address,
     ## cache configuration
     keystone_cache_enabled	=> $keystone_cache_enabled,
     keystone_cache_config_prefix	=> $keystone_cache_config_prefix,
@@ -121,10 +125,9 @@ class jiocloud::openstack::keystone (
       keystone_accepted_roles => $keystone_accepted_roles,
       region                  => $region,
       public_address          => $ceph_radosgw_public_address,
-      public_port             => $ceph_radosgw_public_port,
+      public_port             => $ceph_radosgw_port,
       admin_address           => $ceph_radosgw_admin_address,
       internal_address        => $ceph_radosgw_internal_address,
-#      port           		=> $ceph_radosgw_internal_port,
       public_protocol		=> $ceph_radosgw_protocol,
     }
   }
