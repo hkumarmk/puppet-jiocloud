@@ -71,7 +71,6 @@ class jiocloud::params {
   $apt_sources = hiera('jiocloud::system::apt_sources',undef)
 
 
-  if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
     if 'vhost0' in $interfaces_array {
         $vrouter_interface = vhost0
         $contrail_vrouter_ip          = $ipaddress_vhost0
@@ -98,7 +97,6 @@ class jiocloud::params {
          $contrail_static_route_vhost0 = hiera('jiocloud::contrail::static_route_vhost0')
          $contrail_mx_address          = hiera('jiocloud::contrail::mx_addr','10.204.84.26')
     }
-  }
 
 
 
