@@ -86,10 +86,26 @@ class jiocloud::system::stage2 (
 
   ## unmount /mnt for virtualcloud environment
   if downcase($my_environment) == 'virtualcloud' {
-    mount { 'mount_slash_mnt_for_virtualcloud': 
+    mount { 'unmount_slash_mnt_for_virtualcloud': 
       name => '/mnt',
       ensure => absent,
     }
+  }
+
+  ## Setup nscd
+  class {'nscd':
+    package_name => 'unscd',
+    service_name => 'unscd',
+  }
+
+  ## set /etc/hosts entry to 127.0.0.1 to hostname 
+  host { 'localhost':
+    ip => '127.0.0.1',
+    host_aliases => ["${hostname}.${dnsdomainname}",$hostname],
+  }
+
+  if $hosts_entries {
+    create_resources(host,$hosts_entries)
   }
 
 }

@@ -31,6 +31,9 @@ class jiocloud::params {
   $all_nodes_services_to_run = hiera('jiocloud::system::all_nodes_services_to_run',[ 'ssh' ])
   ## END Base system config  
 
+  ## /etc/hosts entries
+  $hosts_entries = hiera('jiocloud::system::hosts',undef)
+
   ## NTP server config
   $ntp_server_servers = hiera('jiocloud::system::ntp_server_servers',[ '10.204.105.101' ]) # NTP servers configured on local ntp servers
   $ntp_servers = hiera('jiocloud::system::ntp_servers',['i1','i2']) # local ntp servers configured on all servers
