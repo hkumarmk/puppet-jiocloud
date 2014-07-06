@@ -157,6 +157,15 @@ class jiocloud::openstack::apache (
     notify  => Service['httpd'],
   }
 
+  file { '/etc/apache2/conf.d/vncproxy.conf':
+    ensure  => $apache_config_ensure,
+    owner   => www-data,
+    group   => www-data,
+    source => "puppet:///modules/jiocloud/apache2/vncproxy.conf",
+    mode    => '0644',
+    notify  => Service['httpd'],
+  }
+
   file { '/etc/apache2/conf.d/keystone.conf':
     ensure  => $apache_config_ensure,
     owner   => www-data,
