@@ -1,7 +1,7 @@
 ### Setting up contrail
 class jiocloud::contrail ( 
 ### Define variables Here
-  $iam_os_compute_node     =   $jiocloud::params::iam_os_compute_node,
+  $iam_os_compute_node     =   $jiocloud::params::iam_compute_node,
   $vrouter_interface       =   $jiocloud::params::vrouter_interface,
   $vrouter_ip              =   $jiocloud::params::contrail_vrouter_ip,
   $discovery_server        =   $jiocloud::params::contrail_discovery_server,

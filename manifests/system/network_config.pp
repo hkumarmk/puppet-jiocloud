@@ -27,8 +27,8 @@ class jiocloud::system::network_config (
 	  interfaces => {
 	    "$compute_fe_interface" => {
 	      "method" => "manual",
-	      "pre-up" =>  "ifconfig \$IFACE mtu $network_device_mtu up",
-	      "pre-down" => 'ifconfig $IFACE down',
+	      "pre-up" =>  "ifconfig $compute_fe_interface mtu $network_device_mtu up",
+	      "pre-down" => "ifconfig $compute_fe_interface down",
 	    },
 	    "vhost0" => {
 	      "method" => "static",
@@ -41,8 +41,8 @@ class jiocloud::system::network_config (
 	    },
 	    "$compute_be_interface" => {
 	      "method" => "manual",
-	      "pre-up" =>  "ifconfig \$IFACE mtu $network_device_mtu up",
-	      "pre-down" => 'ifconfig $IFACE down',
+	      "pre-up" =>  "ifconfig $compute_be_interface mtu $network_device_mtu up",
+	      "pre-down" => "ifconfig $compute_be_interface down",
 	    },
 	    "br0" => {
 	      "method" => "dhcp",
@@ -62,8 +62,8 @@ class jiocloud::system::network_config (
 	    },
 	    "$compute_fe_interface" => {
 	      "method" => "manual",
-	      "pre-up" =>  "ifconfig \$IFACE mtu $network_device_mtu up",
-	      "pre-down" => 'ifconfig $IFACE down',
+	      "pre-up" =>  "ifconfig $compute_fe_interface mtu $network_device_mtu up",
+	      "pre-down" => "ifconfig $compute_fe_interface down",
 	    },
 	    "vhost0" => {
 	      "method" => "static",
@@ -88,7 +88,7 @@ class jiocloud::system::network_config (
 	    },
 	    "$compute_be_interface" => {
 	      "method" => "manual",
-	      "pre-up" =>  "ifconfig \$IFACE mtu $network_device_mtu",
+	      "pre-up" =>  "ifconfig $compute_be_interface mtu $network_device_mtu",
 	    },
 	    "br0" => {
 	      "method" => "dhcp",

@@ -436,7 +436,6 @@ class jiocloud::params {
   $keystone_db_url = "mysql://${keystone_db_user}:${keystone_db_password}@${db_host_ip}/${keystone_db_name}?charset=utf8"
   $cinder_db_url = "mysql://${cinder_db_user}:${cinder_db_password}@${db_host_ip}/${cinder_db_name}?charset=utf8"
   $glance_db_url = "mysql://${glance_db_user}:${glance_db_password}@${db_host_ip}/${glance_db_name}?charset=utf8"
-}
 if $iam_compute_node {
   if 'vhost0' in $interfaces_array {
         $vrouter_interface = vhost0
@@ -468,4 +467,4 @@ if $iam_compute_node {
 
 
 }
-
+}
