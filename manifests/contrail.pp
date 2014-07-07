@@ -30,7 +30,7 @@ class jiocloud::contrail (
 
   file { ['/lib/modules',"/lib/modules/$kernelrelease","/lib/modules/${kernelrelease}/extra","/lib/modules/$kernelrelease/extra/net","/lib/modules/$kernelrelease/extra/net/vrouter"]:
         ensure  => directory,
-        before  => File ["/lib/modules/${kernelrelease}/extra/net/vrouter/vrouter.ko"],
+        before  => File ["$vrouter_file"],
   }
   file { "$vrouter_file":
     ensure        => file,
