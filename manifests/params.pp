@@ -31,9 +31,6 @@ class jiocloud::params {
   $all_nodes_services_to_run = hiera('jiocloud::system::all_nodes_services_to_run',[ 'ssh' ])
   ## END Base system config  
 
-  ## /etc/hosts entries
-  $hosts_entries = hiera('jiocloud::system::hosts',undef)
-
   ## NTP server config
   $ntp_server_servers = hiera('jiocloud::system::ntp_server_servers',[ '10.204.105.101' ]) # NTP servers configured on local ntp servers
   $ntp_servers = hiera('jiocloud::system::ntp_servers',['i1','i2']) # local ntp servers configured on all servers
@@ -155,7 +152,7 @@ class jiocloud::params {
     $cinder_public_address       = hiera('jiocloud::openstack::cinder_public_address')
     $glance_public_address       = hiera('jiocloud::openstack::glance_public_address')
     $object_storage_public_address = hiera('jiocloud::ceph::radosgw_public_address')
-    $neutron_public_address      = hiera('jiocloud::openstack::nova_public_address')
+    $neutron_public_address      = hiera('jiocloud::openstack::neutron_public_address')
     $horizon_public_address	= hiera('jiocloud::openstack::horizon_public_address')
     $ceph_radosgw_public_address = hiera('jiocloud::openstack::radosgw_public_address')
   } else {
@@ -165,6 +162,8 @@ class jiocloud::params {
     $cinder_public_address       = $public_address
     $glance_public_address       = $public_address
     $ceph_radosgw_public_address = $public_address 
+    $neutron_public_address	= $public_address
+    $horizon_public_address	= $public_address
     $keystone_port      = 5000
     $nova_port          = 8774
     $glance_port        = 9292
@@ -335,9 +334,21 @@ class jiocloud::params {
   $memcached_server_url = [inline_template('<% @memcached_nodes_address.each do | mc | @mc_url = "#@mc_url #{mc}:#@memcached_port," %> <% end %> <%= @mc_url.gsub(/^ */,"").gsub(/, *$/,"") %> ')]
 
   $horizon_secret_key           = $service_user_password
-  $horizon_api_result_limit     = hiera('jiocloud::openstack::horizon_api_result_limit',2000)
-#  $horizon_ssl_enabled          = $ssl_enabled ## Setting up false now, will enable ssl after initial implementation
-  $horizon_allowed_fqdn         = [$public_address]
+  $horizon_api_result_limit     = hiera('jiocloud::openstack::horizon::api_result_limit',2000)
+  $horizon_allowed_hosts         = hiera('jiocloud::openstack::horizon::allowed_hosts',$horizon_public_address)
+  $horizon_recaptcha_public_key	= hiera('jiocloud::openstack::horizon::recaptcha::public_key')
+  $horizon_recaptcha_private_key = hiera('jiocloud::openstack::horizon::recaptcha::private_key')
+  $horizon_recaptcha_proxy = hiera('jiocloud::proxy_server')
+  
+  $horizon_sms_system_hostname = hiera('jiocloud::openstack::horizon::sms::hostname')
+  $horizon_sms_system_id = hiera('jiocloud::openstack::horizon::sms::system_id')
+  $horizon_sms_system_password = hiera('jiocloud::openstack::horizon::sms::system_password')
+  $horizon_sms_source_addr = hiera('jiocloud::openstack::horizon::sms::source_addr')
+  $horizon_theme_app	= hiera('jiocloud::openstack::horizon::theme_app',undef)
+  $horizon_compress_enabled = hiera('jiocloud::openstack::horizon::compress_enabled','False')
+  $horizon_compress_offline = hiera('jiocloud::openstack::horizon::offline_compression','False')
+  $jiocloud_registration_enabled = hiera('jiocloud::openstack::jiocloud_registration::enabled', false)
+  
   $nova_physical_volumes        = hiera('jiocloud::openstack::nova_physical_volumes')
   $nova_volume_group = hiera('jiocloud::openstack::nova_volume_group','Nova_Volumes')
   $nova_logical_volume	= hiera('jiocloud::openstack::nova_volume_group','nova')
