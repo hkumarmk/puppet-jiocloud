@@ -16,6 +16,7 @@ class jiocloud::openstack::nova::compute (
   $nova_logical_volume = $jiocloud::params::nova_logical_volume,
   $cinder_rbd_secret_uuid = $jiocloud::params::cinder_rbd_secret_uuid,
   $nova_db_url = $jiocloud::params::nova_db_url,
+  $ceph_mon_key = $jiocloud::params::ceph_mon_key,
 ) {
   package { 'ceph-common':
     ensure  => 'installed',

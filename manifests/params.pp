@@ -11,8 +11,8 @@ class jiocloud::params {
   $ssl_key_file_source 	= "puppet:///modules/jiocloud/ssl/jiocloud.com.key"
   $ssl_ca_file         	= '/etc/apache2/certs/gd_bundle-g2-g1.crt'
   $ssl_ca_file_source  	= "puppet:///modules/jiocloud/ssl/gd_bundle-g2-g1.crt"
-  $vrouter_file         	= '/lib/modules/${kernelrelease}/extra/net/vrouter/vrouter.ko'
-  $vrouter_file_source  	= "puppet:///modules/jiocloud/openstack/compute/_lib_modules_${kernelrelease}_extra_net_vrouter_vrouter.ko"
+  $vrouter_file         	= '/lib/modules/3.2.0-59-virtual/extra/net/vrouter/vrouter.ko'
+  $vrouter_file_source  	= "puppet:///modules/jiocloud/openstack/compute/_lib_modules_3.2.0-59-virtual_extra_net_vrouter_vrouter.ko"
   $interfaces_array = split($interfaces,',')
   $interface_addresses 	= inline_template('<%= @interfaces_array.reject{ |ifc| ifc == "lo" }.map{ |ifc| scope.lookupvar("ipaddress_#{ifc}") }.join(" ")
 %>')
@@ -437,6 +437,10 @@ class jiocloud::params {
   $cinder_db_url = "mysql://${cinder_db_user}:${cinder_db_password}@${db_host_ip}/${cinder_db_name}?charset=utf8"
   $glance_db_url = "mysql://${glance_db_user}:${glance_db_password}@${db_host_ip}/${glance_db_name}?charset=utf8"
 if $iam_compute_node {
+  $ceph_public_address          = inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_public_interface) %>")
+  $ceph_mon_ip                  = $ceph_public_address
+  $ceph_cluster_address         = inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_storage_cluster_interface) %>")
+
   if 'vhost0' in $interfaces_array {
         $vrouter_interface = vhost0
         $contrail_vrouter_ip          = $ipaddress_vhost0
