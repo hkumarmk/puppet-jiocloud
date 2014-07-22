@@ -18,12 +18,12 @@ class jiocloud::contrail (
 #	class {'::role_contrail_vrouter':}
 #  }
  class {'::contrail':
-        vrouter_interface       => $contrail_vrouter_interface,
-        vrouter_ip              => $contrail_vrouter_ip,
-        discovery_server        => $contrail_discovery_server,
-        vrouter_mac             => $contrail_vrouter_mac,
-        vrouter_gw              => $contrail_vrouter_gw,
-        vrouter_cidr            => $contrail_vrouter_cidr,
+        vrouter_interface       => $vrouter_interface,
+        vrouter_ip              => $vrouter_ip,
+        discovery_server        => $discovery_server,
+        vrouter_mac             => $vrouter_mac,
+        vrouter_gw              => $vrouter_gw,
+        vrouter_cidr            => $vrouter_cidr,
         metadata_proxy_shared_secret    => $metadata_proxy_shared_secret,
 
    }
