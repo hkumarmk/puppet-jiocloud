@@ -441,6 +441,7 @@ if $iam_compute_node {
   $ceph_mon_ip                  = $ceph_public_address
   $ceph_cluster_address         = inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_storage_cluster_interface) %>")
 
+  $vrouter_physical_interface = $compute_fe_interface
   if 'vhost0' in $interfaces_array {
         $vrouter_interface = vhost0
         $contrail_vrouter_ip          = $ipaddress_vhost0

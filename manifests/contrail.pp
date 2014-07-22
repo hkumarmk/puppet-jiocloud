@@ -3,6 +3,7 @@ class jiocloud::contrail (
 ### Define variables Here
   $iam_os_compute_node     =   $jiocloud::params::iam_compute_node,
   $vrouter_interface       =   $jiocloud::params::vrouter_interface,
+  $vrouter_physical_interface = $jiocloud::params::vrouter_physical_interface,
   $vrouter_ip              =   $jiocloud::params::contrail_vrouter_ip,
   $discovery_server        =   $jiocloud::params::contrail_discovery_server,
   $vrouter_mac             =   $jiocloud::params::contrail_vrouter_mac,
@@ -24,6 +25,7 @@ class jiocloud::contrail (
         vrouter_mac             => $vrouter_mac,
         vrouter_gw              => $vrouter_gw,
         vrouter_cidr            => $vrouter_cidr,
+        vrouter_physical_interface => $vrouter_physical_interface,
         metadata_proxy_shared_secret    => $metadata_proxy_shared_secret,
 
    }
