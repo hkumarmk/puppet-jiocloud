@@ -6,7 +6,7 @@ class jiocloud::contrail (
   $vrouter_physical_interface = $jiocloud::params::vrouter_physical_interface,
   $vrouter_ip              =   $jiocloud::params::contrail_vrouter_ip,
   $vrouter_num_controllers = $jiocloud::params::contrail_vrouter_num_controllers,
-  $edge_router_address		   = $jiocloud::params::contrail_edge_router_address
+  $edge_router_address		   = $jiocloud::params::contrail_edge_router_address,
   $discovery_server        =   $jiocloud::params::contrail_discovery_server,
   $vrouter_mac             =   $jiocloud::params::contrail_vrouter_mac,
   $vrouter_gw              =   $jiocloud::params::contrail_vrouter_gw,
