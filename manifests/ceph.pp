@@ -56,6 +56,9 @@ class jiocloud::ceph (
       create_resources(add_ceph_osd,$ceph_osds,{osd_journal_type => $ceph_osd_journal_type, osd_journal_size => $ceph_osd_journal_size, public_address => $ceph_public_address, cluster_address => $ceph_cluster_address})
     }
     create_resources(sysctl::value,$st_sysctl_settings)	
+    exec { "cleanup_caches":
+        command => "awk 'BEGIN {s=0} /DMA32|Normal/ { if (\$9+\$10+\$11+\$12+\$13+\$14+\$15 < 100) {s=1} } END {if (s == 1) system (\"/bin/sync && /bin/echo 1 > /proc/sys/vm/drop_caches\")  }' /proc/buddyinfo",
+    }
   }
 
   define add_ceph_pools (
