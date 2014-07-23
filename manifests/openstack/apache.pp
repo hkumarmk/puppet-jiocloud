@@ -117,6 +117,13 @@ class jiocloud::openstack::apache (
     mode	=> '0755',
     notify  => Service['httpd'],
   }
+ 
+  file {'/var/log/horizon/horizon.log':
+     ensure     => file,
+     owner      => horizon,
+     group      => horizon,
+     mode       => '0644',
+  }
 
 
   if ($nova_port_to_apache) {
