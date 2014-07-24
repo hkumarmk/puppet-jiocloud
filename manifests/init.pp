@@ -1,4 +1,12 @@
 class jiocloud {
+### Define stages
+  stage { 'init':
+    before => Stage['main'],
+  }
+  stage { 'finish': }
+  Stage['main'] -> Stage['finish']
+  
+
 ## Load params
   class {'jiocloud::params':}
   Exec { path => $jiocloud::params::executable_path }

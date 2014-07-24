@@ -20,11 +20,9 @@
 class jiocloud::system {
   ## Run stage1 of system configuration
   class {'jiocloud::system::stage1':
-    before => Class['jiocloud::system::stage2'],
+    stage => 'init',
   }
   ## Run stage2 of system configuration
-  class {'jiocloud::system::stage2':
-    require => Class['jiocloud::system::stage1'],
-  }
+  class {'jiocloud::system::stage2': }
 
 }
