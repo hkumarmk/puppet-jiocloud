@@ -58,9 +58,10 @@ class jiocloud::params {
 
 
   ### system user 
-  $local_users = hiera('jiocloud::system::local_users',undef)
+  $active_users = hiera('jiocloud::system::active_users',undef)
   $sudo_users = hiera('jiocloud::system::sudo_users',undef)
-  
+  $users = hiera('jiocloud::system::users')
+  $root_password = hiera('jiocloud::system::root_password')
   ### END Sudo users
 
 ## Apt configs

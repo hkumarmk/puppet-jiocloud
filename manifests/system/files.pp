@@ -34,13 +34,13 @@ class jiocloud::system::files {
     notify        => Service['ssh'],
   }
 
-  file { '/etc/cron.d/puppet_task':
-    ensure        => file,
-    owner         => root,
-    group         => root,
-    mode          => 644,
-    content  =>  "*/15 * * * *  root /var/puppet/bin/papply >> /var/log/puppet_run.log 2>&1\n",
-  }
+#  file { '/etc/cron.d/puppet_task':
+#    ensure        => file,
+#    owner         => root,
+#    group         => root,
+#    mode          => 644,
+#    content  =>  "*/15 * * * *  root /var/puppet/bin/papply >> /var/log/puppet_run.log 2>&1\n",
+#  }
 
   file { '/usr/local/bin/':
     ensure        => directory,

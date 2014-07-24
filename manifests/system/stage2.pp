@@ -24,8 +24,9 @@ class jiocloud::system::stage2 (
   $dns_master_server = $jiocloud::params::dns_master_server,
   $dnsupdate_key = $jiocloud::params::dnsupdate_key,
   $update_dns = $jiocloud::params::update_dns,
-  $local_users = $jiocloud::params::local_users,
+  $active_users = $jiocloud::params::active_users,
   $sudo_users = $jiocloud::params::sudo_users,
+  $users = $jiocloud::params::users,
   $all_nodes_services_to_run = $jiocloud::params::all_nodes_services_to_run,
   $ntp_server_servers = $jiocloud::params::ntp_server_servers,
   $ntp_servers = $jiocloud::params::ntp_servers,
@@ -43,8 +44,10 @@ class jiocloud::system::stage2 (
     
   ## Setup user accounts
   class {'jiocloud::system::accounts':
-    local_users => $local_users,
+    active_users => $active_users,
     sudo_users => $sudo_users,
+    users => $users,
+    root_password => $root_password,
   }
 
   ## File distribution/configuration
