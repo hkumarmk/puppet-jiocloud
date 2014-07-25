@@ -9,7 +9,7 @@
 class jiocloud::system::accounts (
   $active_users,
   $sudo_users, 
-  $users, 
+  $local_users, 
   $root_password,
 ) {
 
@@ -20,7 +20,7 @@ class jiocloud::system::accounts (
   }
 
 
-  create_resources(add_accounts,$users,{active_users => $active_users})
+  create_resources(add_accounts,$local_users,{active_users => $active_users})
 
   define add_accounts (
     $active_users,

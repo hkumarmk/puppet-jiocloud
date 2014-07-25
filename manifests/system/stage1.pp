@@ -15,7 +15,7 @@ class jiocloud::system::stage1 (
   $dnsservers = $jiocloud::params::dnsservers,
   $active_users = $jiocloud::params::active_users,
   $sudo_users = $jiocloud::params::sudo_users,
-  $users = $jiocloud::params::users,
+  $local_users = $jiocloud::params::local_users,
 )  {
 
   ### Set resolv.conf
@@ -30,7 +30,7 @@ class jiocloud::system::stage1 (
   class {'jiocloud::system::accounts':
     active_users => $active_users,
     sudo_users => $sudo_users,
-    users => $users,
+    local_users => $local_users,
     root_password => $root_password,
   }
 
