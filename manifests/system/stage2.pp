@@ -59,7 +59,7 @@ class jiocloud::system::stage2 (
 
   ## Setup ntp servers
   if $jiocloud::params::iam_ntpserver_node == 'true' {
-    class { '::ntp': servers => $ntp_server_servers, }
+    class { '::ntp': servers => $ntp_server_servers, udlc => true }
   } else {
     class {'::ntp': servers => $ntp_servers, }
   }
