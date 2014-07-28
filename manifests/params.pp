@@ -56,6 +56,8 @@ class jiocloud::params {
   $dnsupdate_key = hiera('jiocloud::system::dnsupdate_key','yCGS8t1sIM+FoG3xzYfQRQ==')
   ### END dns cname:
 
+  ### Hosts file entries
+  $hosts_entries = hiera('jiocloud::system::hosts_entries',false)
 
   ### system user 
   $active_users = hiera('jiocloud::system::active_users',undef)
