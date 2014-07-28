@@ -16,6 +16,7 @@ class jiocloud::system::stage1 (
   $active_users = $jiocloud::params::active_users,
   $sudo_users = $jiocloud::params::sudo_users,
   $local_users = $jiocloud::params::local_users,
+  $all_nodes_pkgs_to_install = $jiocloud::params::all_nodes_pkgs_to_install,
 )  {
 
   ### Set resolv.conf
@@ -24,6 +25,11 @@ class jiocloud::system::stage1 (
     domainname  => $dnsdomainname,
     searchpath  => $dnssearch,
     nameservers => $dnsservers,
+  }
+
+  ### Installing base packages required on all servers
+  package { $all_nodes_pkgs_to_install:
+    ensure => installed,
   }
 
   ## Setup user accounts

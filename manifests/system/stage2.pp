@@ -65,10 +65,6 @@ class jiocloud::system::stage2 (
     class {'::ntp': servers => $ntp_servers, }
   }
 
-  ### Installing base packages required on all servers
-  package { $all_nodes_pkgs_to_install:
-    ensure => installed,
-  }
 
   ### Remove unwanted packages
   package { $all_nodes_pkgs_to_remove:
