@@ -1,11 +1,7 @@
 ## Class: jiocloud::openstack::glance
 class jiocloud::openstack::glance (
-  $verbose = $jiocloud::params::verbose,
-  $debug = $jiocloud::params::debug,
   $use_syslog = $jiocloud::params::glance_use_syslog,
   $syslog_log_facility = $jiocloud::params::glance_syslog_log_facility,
-  $verbose = $jiocloud::params::verbose,
-  $debug = $jiocloud::params::debug,
   $registry_host = $jiocloud::params::glance_public_address,
   $registry_protocol = $jiocloud::params::glance_protocol,
   $registry_bind_port = $jiocloud::params::glance_registry_listen_port,
@@ -22,10 +18,10 @@ class jiocloud::openstack::glance (
   $glance_nodes = $jiocloud::params::glance_nodes,
   $backend = $jiocloud::params::glance_backend,
   $service_listen_address = $jiocloud::params::service_listen_address,
-) {
-  if downcase($hostname) in downcase($glance_nodes) {
+) inherits jiocloud::params {
 
-#    add_ceph_auth_glance {'glance': }
+  ## Add ceph keyring for glance on glance nodes
+  if downcase($hostname) in downcase($glance_nodes) {
     jiocloud::ceph::auth::add_ceph_auth {'glance':
       file_owner => 'glance',
     }
@@ -52,6 +48,30 @@ class jiocloud::openstack::glance (
       enabled           => true,
     }
 
+    # configure apache - glance-api
+    apache::vhost { 'glance-api':
+      servername => $glance_public_address,
+      serveradmin => $admin_email,
+      port => $glance_port,
+      ssl => $ssl_enabled,
+      docroot => $os_apache_docroot,
+      error_log_file => 'glance-api.log',
+      access_log_file => 'glance-api.log',
+      proxy_pass => [ { path => '/', url => "http://localhost:${glance_api_listen_port}/"  } ],
+    }
+
+    # configure apache - glance-registry
+    apache::vhost { 'glance-registry':
+      servername => $glance_public_address,
+      serveradmin => $admin_email,
+      port => $glance_registry_port,
+      ssl => $ssl_enabled,
+      docroot => $os_apache_docroot,
+      error_log_file => 'glance-registry.log',
+      access_log_file => 'glance-registry.log',
+      proxy_pass => [ { path => '/', url => "http://localhost:${glance_registry_listen_port}/"  } ],
+    }
+    
     # Install and configure glance-registry
     class { '::glance::registry':
       verbose           => $verbose,
