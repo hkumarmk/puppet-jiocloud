@@ -60,7 +60,7 @@ class jiocloud::openstack::keystone (
   $region = $jiocloud::params::region,
   $service_listen_address = $jiocloud::params::service_listen_address,
 
-) {
+) inherits jiocloud::params {
   class { '::openstack::keystone':
     db_host => $db_host_ip,
     db_password => $keystone_db_password,
@@ -142,4 +142,29 @@ class jiocloud::openstack::keystone (
     keystone_version        => $keystone_version,
     admin_tenant    => 'admin',
   }
+
+  ## Configure apache reverse proxy
+  apache::vhost { 'keystone':
+      servername => $keystone_public_address,
+      serveradmin => $admin_email,
+      port => $keystone_port,
+      ssl => $ssl_enabled,
+      docroot => $os_apache_docroot,
+      error_log_file => 'keystone.log',
+      access_log_file => 'keystone.log',
+      proxy_pass => [ { path => '/', url => "http://localhost:${keystone_public_listen_port}/"  } ],
+    }
+
+  ## Configure apache reverse proxy
+  apache::vhost { 'keystone-admin':
+      servername => $keystone_public_address,
+      serveradmin => $admin_email,
+      port => $keystone_admin_port,
+      ssl => $ssl_enabled,
+      docroot => $os_apache_docroot,
+      error_log_file => 'keystone.log',
+      access_log_file => 'keystone.log',
+      proxy_pass => [ { path => '/', url => "http://localhost:${keystone_admin_listen_port}/"  } ],
+    }
+
 }
