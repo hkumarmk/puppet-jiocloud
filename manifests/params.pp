@@ -147,6 +147,7 @@ class jiocloud::params {
     $keystone_port 	= $multi_url_port
     $nova_port		= $multi_url_port
     $glance_port	= $multi_url_port
+    $glance_registry_port	= 9191
     $cinder_port	= $multi_url_port
     $neutron_port	= $multi_url_port
     $ceph_radosgw_port  = $multi_url_port
@@ -170,6 +171,7 @@ class jiocloud::params {
     $keystone_port      = 5000
     $nova_port          = 8774
     $glance_port        = 9292
+    $glance_registry_port	= 9191
     $cinder_port        = 8776
     $neutron_port	= 9695
     $ceph_radosgw_port  = 8143
@@ -179,6 +181,14 @@ class jiocloud::params {
   $storage_nodes           = hiera('jiocloud::storage_nodes','st')
   $contrail_nodes          = hiera('jiocloud::contrail_nodes','ct')
   $os_controller_nodes	   = hiera('jiocloud::openstack::controller_nodes')
+
+  ## Apache configs for openstack controller application reverse proxy 
+  ## FIXME: The controller applications to be migrated to apache as wsgi app, tried but got issues on operations for now.
+  $os_apache_docroot = hiera('jiocloud::openstack::apache_docroot')
+  $horizon_wsgi_daemon_user = hiera('jiocloud::openstack::horizon_wsgi_daemon_user')
+  $horizon_wsgi_daemon_group = hiera('jiocloud::openstack::horizon_wsgi_daemon_group')
+  $horizon_wsgi_num_procs = hiera('jiocloud::openstack::horizon_wsgi_num_procs')
+  $horizon_wsgi_num_threads = hiera('jiocloud::openstack::horizon_wsgi_num_threads')
 ## Package management
 ## FIXME: ideally installing new packages should be managed by apt-get upgrade,   
   $os_package_ensure	= hiera('jiocloud::openstack::os_package_ensure','present')

@@ -10,64 +10,32 @@ class jiocloud::openstack::apache (
   $ssl_enabled = $jiocloud::params::ssl_enabled,
 ) {
 
-  #FIXME: WORKAROUND TO ENABLE SSL
-
-  if $ssl_enabled  {
-    $apache_config_ensure = file
+  if $ssl_enabled {
+    class {'::apache':
+      server_signature => 'Off',
+      default_ssl_chain => $ssl_ca_file,
+      default_ssl_cert => $ssl_cert_file,
+      default_ssl_key => $ssl_key_file,
+      default_vhost => false,
+      apache_version => '2.4',
+    }
+    include ::apache::mod::wsgi
+    include apache::mod::rewrite
+    include apache::mod::ssl
+    include apache::mod::proxy
+    include apache::mod::proxy_http
+    ## this is required to proxy novncproxy
+    ::apache::mod { 'proxy_wstunnel': }	
   } else {
-    $apache_config_ensure = absent
-  }
-
-
-
-
-  include ::apache
-  include ::apache::mod::wsgi
-  include apache::mod::rewrite
-  include apache::mod::ssl
-  include apache::mod::proxy
-  include apache::mod::proxy_http
-  ## this is required to proxy novncproxy
-  ::apache::mod { 'proxy_wstunnel': }	
-
-  file { '/etc/apache2/conf.d/glance.conf':
-    ensure  => $apache_config_ensure,
-    owner   => www-data,
-    group   => www-data,
-    source => "puppet:///modules/jiocloud/apache2/glance.conf",
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
-
-
-
-  file { '/etc/apache2/conf.d/glance-registry.conf':
-    ensure  => $apache_config_ensure,
-    owner   => www-data,
-    group   => www-data,
-    source => "puppet:///modules/jiocloud/apache2/glance-registry.conf",
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
-
-  file { '/etc/apache2/conf.d/horizon.conf':
-    ensure  => file,
-    owner   => www-data,
-    group   => www-data,
-    content => template("jiocloud/apache2/horizon.conf.erb"),
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
-
-  file { '/etc/apache2/conf.d/jiocloud-registration-service.conf':
-    ensure  => file,
-    owner   => www-data,
-    group   => www-data,
-    content => template("jiocloud/apache2/jiocloud-registration-service.conf"),
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
-
+    class {'::apache':
+      server_signature => 'Off',
+      default_vhost => false,
+    }
+    include ::apache::mod::wsgi
+    include apache::mod::rewrite
+    include apache::mod::proxy
+    include apache::mod::proxy_http
+  } 
 
   file { '/etc/apache2/certs':
     ensure	=> directory,
@@ -110,76 +78,4 @@ class jiocloud::openstack::apache (
     }
   }
 
-  file {'/var/log/horizon':
-    ensure 	=> directory,
-    owner 	=> horizon,
-    group	=> horizon,
-    mode	=> '0755',
-    notify  => Service['httpd'],
-  }
- 
-  file {'/var/log/horizon/horizon.log':
-     ensure     => file,
-     owner      => horizon,
-     group      => horizon,
-     mode       => '0644',
-  }
-
-
-  if ($nova_port_to_apache) {
-    file { '/etc/apache2/conf.d/compute.conf':
-      ensure  => $apache_config_ensure,
-      owner   => www-data,
-      group   => www-data,
-      source => "puppet:///modules/jiocloud/apache2/compute.conf.wsgi",
-      mode    => '0644',
-      notify  => Service['httpd'],
-    }
-  } else {
-    file { '/etc/apache2/conf.d/compute.conf':
-      ensure  => $apache_config_ensure,
-      owner   => www-data,
-      group   => www-data,
-      source => "puppet:///modules/jiocloud/apache2/compute.conf.proxy",
-      mode    => '0644',
-      notify  => Service['httpd'],
-    }
-  }
-
-  file { '/etc/apache2/conf.d/ec2.conf':
-    ensure  => $apache_config_ensure,
-    owner   => www-data,
-    group   => www-data,
-    source => "puppet:///modules/jiocloud/apache2/ec2.conf",
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
-
-  file { '/etc/apache2/conf.d/cinder.conf':
-    ensure  => $apache_config_ensure,
-    owner   => www-data,
-    group   => www-data,
-    source => "puppet:///modules/jiocloud/apache2/cinder.conf",
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
-
-  file { '/etc/apache2/conf.d/vncproxy.conf':
-    ensure  => $apache_config_ensure,
-    owner   => www-data,
-    group   => www-data,
-    source => "puppet:///modules/jiocloud/apache2/vncproxy.conf",
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
-
-  file { '/etc/apache2/conf.d/keystone.conf':
-    ensure  => $apache_config_ensure,
-    owner   => www-data,
-    group   => www-data,
-    source => "puppet:///modules/jiocloud/apache2/keystone.conf",
-    mode    => '0644',
-    notify  => Service['httpd'],
-  }
- 
 }

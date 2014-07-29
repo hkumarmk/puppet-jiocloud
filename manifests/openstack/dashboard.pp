@@ -26,17 +26,81 @@ class jiocloud::openstack::dashboard () inherits jiocloud::params {
     compress_offline => $horizon_compress_offline,
   }
 
-if $jiocloud_registration_enabled {
-  class { '::jiocloud_registration':
-    fqdn                => $horizon_public_address,
-    keystone_add        => $keystone_public_address,
-    listen_ssl          => $ssl_enabled,
-    horizon_key         => $ssl_key_file,
-    horizon_cert        => $ssl_cert_file,
-    horizon_ca          => $ssl_ca_file,
-    keystone_public_port => $keystone_port,
-    keystone_admin_token => $admin_token,
-    package_ensure      => $jiocloud_registration_package_ensure,
+  if $jiocloud_registration_enabled {
+    class { '::jiocloud_registration':
+      fqdn                => $horizon_public_address,
+      keystone_add        => $keystone_public_address,
+      listen_ssl          => $ssl_enabled,
+      horizon_key         => $ssl_key_file,
+      horizon_cert        => $ssl_cert_file,
+      horizon_ca          => $ssl_ca_file,
+      keystone_public_port => $keystone_port,
+      keystone_admin_token => $admin_token,
+      package_ensure      => $jiocloud_registration_package_ensure,
+    }
   }
-}
+
+##Configure apache
+  if $ssl_enabled {
+    apache::vhost { 'horizon-http':
+      servername => $horizon_public_address,
+      serveradmin => $admin_email,
+      default_vhost => true,
+      port => 80,
+      docroot => $os_apache_docroot,
+      logroot => '/var/log/horizon',
+      error_log_file => 'horizon.log',
+      access_log_file => 'horizon.log',
+      rewrites => [ { comment => "Rewrite http to https", rewrite_cond => ['%{HTTPS} off'], rewrite_rule => ['(.*) https://%{HTTP_HOST}%{REQUEST_URI}' ] } ],
+    }
+
+    ## Horizon Https config
+    apache::vhost { 'horizon-https':
+      servername => $horizon_public_address,
+      serveradmin => $admin_email,
+      port => 443,
+      ssl => true,
+      docroot => $os_apache_docroot,
+      logroot => '/var/log/horizon',
+      error_log_file => 'horizon.log',
+      access_log_file => 'horizon.log',
+      aliases => [ {alias => '/static', path => '/usr/share/openstack-dashboard/openstack_dashboard/static/'} ],
+      directories => [ { path => '/usr/share/openstack-dashboard/openstack_dashboard/wsgi', order => 'Allow,Deny', allow => 'from all', } ],
+      redirectmatch_regexp => ['^/$ /horizon/'],
+      redirectmatch_status => [301],
+      wsgi_script_aliases => { '/horizon' => '/usr/share/openstack-dashboard/openstack_dashboard/wsgi/django.wsgi' },
+      wsgi_daemon_process => 'horizon',
+      wsgi_process_group  => 'horizon',
+      wsgi_daemon_process_options => {
+        user => $horizon_wsgi_daemon_user,
+        group => $horizon_wsgi_daemon_group,
+        processes => $horizon_wsgi_num_procs,
+        threads => $horizon_wsgi_num_threads
+       },
+    }
+  } else {
+    apache::vhost { 'horizon-http':
+      servername => $horizon_public_address,
+      serveradmin => $admin_email,
+      default_vhost => true,
+      port => 80,
+      docroot => '/var/www/',
+      logroot => '/var/log/horizon',
+      error_log_file => 'horizon.log',
+      access_log_file => 'horizon.log',
+      aliases => [ {alias => '/static', path => '/usr/share/openstack-dashboard/openstack_dashboard/static/'} ],
+      directories => [ { path => '/usr/share/openstack-dashboard/openstack_dashboard/wsgi', order => 'Allow,Deny', allow => 'from all', } ],
+      redirectmatch_regexp => ['^/$ /horizon/'],
+      redirectmatch_status => [301],
+      wsgi_script_aliases => { '/horizon' => '/usr/share/openstack-dashboard/openstack_dashboard/wsgi/django.wsgi' },
+      wsgi_daemon_process => 'horizon',
+      wsgi_process_group  => 'horizon',
+      wsgi_daemon_process_options => {
+        user => $horizon_wsgi_daemon_user,
+        group => $horizon_wsgi_daemon_group,
+        processes => $horizon_wsgi_num_procs,
+        threads => $horizon_wsgi_num_threads
+        },
+    }
+  }
 }
