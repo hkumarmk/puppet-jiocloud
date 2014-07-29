@@ -470,7 +470,7 @@ if $iam_compute_node {
         $contrail_vrouter_cidr = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
          $contrail_discovery_server    = hiera('jiocloud::contrail::discovery::server','10.1.0.16')
          $contrail_vrouter_num_controllers = hiera('jiocloud::contrail::vrouter_num_controller',2)         # Number of controllers the vrouter can connect - 1 or 2
-         $contrail_vrouter_mac         = inline_template("<%= scope.lookupvar('macaddress_' + @contrail_vrouter_interface) %>")
+         $contrail_vrouter_mac         = inline_template("<%= scope.lookupvar('macaddress_' + @vrouter_interface) %>")
 #FIXME: This array to be implemented
          $contrail_static_route_vhost0 = hiera('jiocloud::contrail::static_route_vhost0')
          $contrail_edge_router_address          = hiera('jiocloud::contrail::edge_router_addr','10.204.84.26')
