@@ -1,15 +1,6 @@
 ## Class: jiocloud::openstack::nova::controller
 
 class jiocloud::openstack::nova::controller (
-  $quota_instances = $jiocloud::params::quota_instances,
-  $quota_cores = $jiocloud::params::quota_cores,
-  $quota_ram = $jiocloud::params::quota_ram,
-  $quota_volumes = $jiocloud::params::quota_volumes,
-  $quota_gigabytes = $jiocloud::params::quota_gigabytes,
-  $quota_floating_ips = $jiocloud::params::quota_floating_ips,
-  $quota_max_injected_files = $jiocloud::params::quota_max_injected_files,
-  $quota_security_groups = $jiocloud::params::quota_security_groups,
-  $quota_security_group_rules = $jiocloud::params::quota_security_group_rules,
   $quota_key_pairs = $jiocloud::params::quota_key_pairs,
   $os_controller_nodes_pkgs_to_install = $jiocloud::params::os_controller_nodes_pkgs_to_install,
   $nova_vncproxy_nodes = $jiocloud::params::nova_vncproxy_nodes,
@@ -47,7 +38,7 @@ class jiocloud::openstack::nova::controller (
   $keystone_internal_url = $jiocloud::params::keystone_internal_url,
   $service_listen_address = $jiocloud::params::service_listen_address,
 
-) {
+) inherits jiocloud::params {
   
   if downcase($hostname) in downcase($nova_vncproxy_nodes) { $nova_vncproxy_enabled = true }
   else { $nova_vncproxy_enabled	= false }
@@ -148,5 +139,41 @@ class jiocloud::openstack::nova::controller (
     port => $nova_vncproxy_listen_port,
     enabled => $nova_vncproxy_enabled,
   }	
+
+  ## Configure apache reverse proxy
+  apache::vhost { 'nova-api':
+      servername => $nova_public_address,
+      serveradmin => $admin_email,
+      port => $nova_port,
+      ssl => $ssl_enabled,
+      docroot => $os_apache_docroot,
+      error_log_file => 'nova-api.log',
+      access_log_file => 'nova-api.log',
+      proxy_pass => [ { path => '/', url => "http://localhost:${nova_osapi_compute_listen_port}/"  } ],
+    }
+
+  ## Configure apache reverse proxy
+  apache::vhost { 'nova-ec2':
+      servername => $nova_public_address,
+      serveradmin => $admin_email,
+      port => $nova_ec2_port,
+      ssl => $ssl_enabled,
+      docroot => $os_apache_docroot,
+      error_log_file => 'nova-ec2.log',
+      access_log_file => 'nova-ec2.log',
+      proxy_pass => [ { path => '/', url => "http://localhost:${nova_ec2_listen_port}/"  } ],
+    }
+
+  ## Configure apache reverse proxy
+  apache::vhost { 'nova-vncproxy':
+      servername => $nova_public_address,
+      serveradmin => $admin_email,
+      port => $nova_vncproxy_port,
+      ssl => $ssl_enabled,
+      docroot => $os_apache_docroot,
+      error_log_file => 'nova-vncproxy.log',
+      access_log_file => 'nova-vncproxy.log',
+      proxy_pass => [ { path => '/', url => "http://localhost:${nova_vncproxy_listen_port}/"  } ],
+    }
 
 }  

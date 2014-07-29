@@ -24,7 +24,7 @@ class jiocloud::openstack::cinder (
   $cinder_rbd_secret_uuid = $jiocloud::params::cinder_rbd_secret_uuid,
   $volume_tmp_dir = $jiocloud::params::volume_tmp_dir,
   $service_listen_address = $jiocloud::params::service_listen_address,
-) {
+) inherits jiocloud::params {
   if (downcase($hostname) in downcase($cinder_backup_nodes)) or (downcase($hostname) in downcase($cinder_volume_nodes)) {
     package { 'ceph-common': ensure => 'installed', }
     jiocloud::ceph::auth::add_ceph_auth {'cinder_backup':
@@ -76,5 +76,18 @@ class jiocloud::openstack::cinder (
       volume_tmp_dir  => $volume_tmp_dir,
     }
   }
+
+    # configure apache - glance-api
+  apache::vhost { 'cinder-api':
+    servername => $cinder_public_address,
+    serveradmin => $admin_email,
+    port => $cinder_port,
+    ssl => $ssl_enabled,
+    docroot => $os_apache_docroot,
+    error_log_file => 'cinder-api.log',
+    access_log_file => 'cinder-api.log',
+    proxy_pass => [ { path => '/', url => "http://localhost:${cinder_listen_port}/"  } ],
+  }
+
 
 }

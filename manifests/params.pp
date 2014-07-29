@@ -146,6 +146,8 @@ class jiocloud::params {
   if $multi_url {
     $keystone_port 	= $multi_url_port
     $nova_port		= $multi_url_port
+    $nova_ec2_port	= 8773 
+    $nova_vncproxy_port = 6080
     $glance_port	= $multi_url_port
     $glance_registry_port	= 9191
     $cinder_port	= $multi_url_port
@@ -170,6 +172,8 @@ class jiocloud::params {
     $horizon_public_address	= $public_address
     $keystone_port      = 5000
     $nova_port          = 8774
+    $nova_ec2_port	= 8773 
+    $nova_vncproxy_port = 6080
     $glance_port        = 9292
     $glance_registry_port	= 9191
     $cinder_port        = 8776
