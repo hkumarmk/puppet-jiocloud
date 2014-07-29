@@ -9,6 +9,7 @@ class jiocloud::openstack::nova::compute (
   $network_device_mtu      = $jiocloud::params::network_device_mtu,
   $enable_migration	  = $jiocloud::params::nova_enable_migration,
   $nova_libvirt_images_type = $jiocloud::params::nova_libvirt_images_type,
+  $nova_libvirt_type = $jiocloud::params::nova_libvirt_type,
   $nova_snapshot_image_format = $jiocloud::params::nova_snapshot_image_format,
   $neutron_libvirt_vif_driver = $jiocloud::params::neutron_libvirt_vif_driver,
   $nova_volume_group  = $jiocloud::params::nova_volume_group,
@@ -60,6 +61,7 @@ class jiocloud::openstack::nova::compute (
     vncserver_listen => '0.0.0.0',
     libvirt_images_type => $nova_libvirt_images_type,
     snapshot_image_format => $nova_snapshot_image_format,
+    libvirt_type => $nova_libvirt_type,
   }
 
   class { '::nova::compute::neutron':

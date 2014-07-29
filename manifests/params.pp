@@ -370,6 +370,7 @@ class jiocloud::params {
   $nova_volume_group = hiera('jiocloud::openstack::nova_volume_group','Nova_Volumes')
   $nova_logical_volume	= hiera('jiocloud::openstack::nova_volume_group','nova')
   $nova_libvirt_images_type = hiera('jiocloud::openstack::nova_libvirt_images_type','raw')
+  $nova_libvirt_type = hiera('jiocloud::openstack::nova_libvirt_type')
   $nova_snapshot_image_format = hiera('jiocloud::openstack::nova_snapshot_image_format','qcow2')
 
 ## Ceph params
