@@ -21,7 +21,7 @@ class jiocloud::system::network_config (
 )  {
   $vm_hosted_node = inline_template('<% @mgmt_vms.each do | key, val | val.each do | k,v | if v == @hostname %> <%= "vm_hosted" %> <% end %> <% end %> <% end %>')
     if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
-      if $vm_hosted_node =~ /vm_hosted/ {
+      if $vm_hosted_node =~ /vm_hosted/ and $contrail_vrouter_ip {
 	class { "network::interfaces":
 	  bridged_if => $compute_be_interface,
 	  interfaces => {
@@ -55,28 +55,30 @@ class jiocloud::system::network_config (
 	  auto => [$compute_fe_interface,$compute_be_interface,"br0","vhost0"],
 	}
       } else {
-	class { "network::interfaces":
-	  interfaces => {
-	    "$compute_be_interface" => {
-	      "method" => "dhcp",
+        if $contrail_vrouter_ip {
+	  class { "network::interfaces":
+	    interfaces => {
+	      "$compute_be_interface" => {
+	        "method" => "dhcp",
+	      },
+	      "$compute_fe_interface" => {
+	        "method" => "manual",
+	        "pre-up" =>  "ifconfig $compute_fe_interface mtu $network_device_mtu up",
+	        "pre-down" => "ifconfig $compute_fe_interface down",
+	      },
+	      "vhost0" => {
+	        "method" => "static",
+	        "pre-up" => ["vif --create vhost0 --mac $contrail_vrouter_mac","vif --add vhost0 --mac $contrail_vrouter_mac --vrf 0 --mode x --type vhost"],
+	        "pre-down" => ["/etc/contrail/vif-helper delete vhost0","ip link del vhost0"],
+	        "netmask"  => "$contrail_vrouter_netmask",
+	        "address"  => "$contrail_vrouter_ip",
+	        "gateway"  => "$contrail_vrouter_gw",
+	        "mtu"	=> "$network_device_mtu",
+	      },
 	    },
-	    "$compute_fe_interface" => {
-	      "method" => "manual",
-	      "pre-up" =>  "ifconfig $compute_fe_interface mtu $network_device_mtu up",
-	      "pre-down" => "ifconfig $compute_fe_interface down",
-	    },
-	    "vhost0" => {
-	      "method" => "static",
-	      "pre-up" => ["vif --create vhost0 --mac $contrail_vrouter_mac","vif --add vhost0 --mac $contrail_vrouter_mac --vrf 0 --mode x --type vhost"],
-	      "pre-down" => ["/etc/contrail/vif-helper delete vhost0","ip link del vhost0"],
-	      "netmask"  => "$contrail_vrouter_netmask",
-	      "address"  => "$contrail_vrouter_ip",
-	      "gateway"  => "$contrail_vrouter_gw",
-	      "mtu"	=> "$network_device_mtu",
-	    },
-	  },
-	  auto => [$compute_fe_interface,$compute_be_interface,"vhost0"],
-	}
+	    auto => [$compute_fe_interface,$compute_be_interface,"vhost0"],
+	  }
+        }
       }
     } else {
       if $vm_hosted_node =~ /vm_hosted/ {

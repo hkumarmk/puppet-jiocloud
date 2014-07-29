@@ -33,7 +33,7 @@ class jiocloud::contrail (
  	edge_router_address    => $edge_router_address
    }
 
-  file { ['/lib/modules',"/lib/modules/3.2.0-59-virtual","/lib/modules/3.2.0-59-virtual/extra","/lib/modules/3.2.0-59-virtual/extra/net","/lib/modules/3.2.0-59-virtual/extra/net/vrouter"]:
+  file { ['/lib/modules',"/lib/modules/$kernelrelease","/lib/modules/$kernelrelease/extra","/lib/modules/$kernelrelease/extra/net","/lib/modules/$kernelrelease/extra/net/vrouter"]:
         ensure  => directory,
         before  => File ["$vrouter_file"],
   }
