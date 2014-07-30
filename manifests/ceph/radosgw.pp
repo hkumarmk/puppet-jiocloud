@@ -25,7 +25,6 @@ class jiocloud::ceph::radosgw (
   $ssl_ca_file = $jiocloud::params::ssl_ca_file,
   $ssl_ca_file_source = $jiocloud::params::ssl_ca_file_source,
   $ceph_radosgw_apache_version = $jiocloud::params::ceph_radosgw_apache_version,
-  $ceph_radosgw_apache_deps = $jiocloud::params::ceph_radosgw_apache_deps,
 ) {
   file {'/etc/apache2/certs/':
     ensure => directory,
@@ -54,7 +53,6 @@ class jiocloud::ceph::radosgw (
     radosgw_ca_file		=> $ssl_ca_file,
     radosgw_ca_file_source	=> $ssl_ca_file_source,
     radosgw_apache_version	=> $ceph_radosgw_apache_version,
-    radosgw_apache_deps	=> $ceph_radosgw_apache_deps,
   }
 
 
