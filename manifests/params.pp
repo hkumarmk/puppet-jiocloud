@@ -32,28 +32,28 @@ class jiocloud::params {
   ## END Base system config  
 
   ## NTP server config
-  $ntp_server_servers = hiera('jiocloud::system::ntp_server_servers',[ '10.204.105.101' ]) # NTP servers configured on local ntp servers
-  $ntp_servers = hiera('jiocloud::system::ntp_servers',['i1','i2']) # local ntp servers configured on all servers
+  $ntp_server_servers = hiera('jiocloud::system::ntp_server_servers') # NTP servers configured on local ntp servers
+  $ntp_servers = hiera('jiocloud::system::ntp_servers') # local ntp servers configured on all servers
   ## END NTP server config
 
 
   ## network interface configuration
-  $compute_fe_interface = hiera('jiocloud::system::compute_fe_interface','eth2')
-  $compute_be_interface = hiera('jiocloud::system::compute_be_interface','eth3')
+  $compute_fe_interface = hiera('jiocloud::system::compute_fe_interface')
+  $compute_be_interface = hiera('jiocloud::system::compute_be_interface')
   $network_device_mtu = hiera('jiocloud::system::network_device_mtu',1500)
   ## END network interface configuration
   
   ## resolv.conf: setup resolv.conf 
-  $dnsdomainname = hiera('jiocloud::system::dnsdomainname','mu.jio')
+  $dnsdomainname = hiera('jiocloud::system::dnsdomainname')
   $dnssearch = hiera('jiocloud::system::dnssearch',[ $dnsdomainname ])
-  $dnsservers = hiera('jiocloud::system::dnsservers',[ '10.135.121.138','10.135.121.107'])
+  $dnsservers = hiera('jiocloud::system::dnsservers')
   ## END resolv.conf:
 
   ###dns cname: Required to setup function based cname in dns 
   $manage_hostname = hiera('jiocloud::system::manage_hostname',false)
   $update_dns	= hiera('jiocloud::system::update_dns',false)
-  $dns_master_server = hiera('jiocloud::system::dns_master_server','10.135.121.138')
-  $dnsupdate_key = hiera('jiocloud::system::dnsupdate_key','yCGS8t1sIM+FoG3xzYfQRQ==')
+  $dns_master_server = hiera('jiocloud::system::dns_master_server')
+  $dnsupdate_key = hiera('jiocloud::system::dnsupdate_key')
   ### END dns cname:
 
   ### Hosts file entries
@@ -67,26 +67,26 @@ class jiocloud::params {
   ### END Sudo users
 
 ## Apt configs
-  $local_repo_ip = hiera('jiocloud::system::local_repo_ip','10.135.96.60')
+  $local_repo_ip = hiera('jiocloud::system::local_repo_ip')
   $apt_sources = hiera('jiocloud::system::apt_sources',undef)
 
 
 
-  $keystone_db_user = hiera('jiocloud::openstack::keystone_db_user','keystone')
-  $keystone_db_password = hiera('jiocloud::openstack::keystone_db_password','keystone@1234')
-  $keystone_db_name = hiera('jiocloud::openstack::keystone_db_name','keystone')
+  $keystone_db_user = hiera('jiocloud::openstack::keystone_db_user')
+  $keystone_db_password = hiera('jiocloud::openstack::keystone_db_password')
+  $keystone_db_name = hiera('jiocloud::openstack::keystone_db_name')
 
-  $glance_db_user = hiera('jiocloud::openstack::glance_db_user','glance')
-  $glance_db_password = hiera('jiocloud::openstack::glance_db_password','glance@1234')
-  $glance_db_name = hiera('jiocloud::openstack::glance_db_name','glance')
+  $glance_db_user = hiera('jiocloud::openstack::glance_db_user')
+  $glance_db_password = hiera('jiocloud::openstack::glance_db_password')
+  $glance_db_name = hiera('jiocloud::openstack::glance_db_name')
 
-  $nova_db_user = hiera('jiocloud::openstack::nova_db_user','nova')
-  $nova_db_password = hiera('jiocloud::openstack::nova_db_password','nova@1234')
-  $nova_db_name = hiera('jiocloud::openstack::nova_db_name','nova')
+  $nova_db_user = hiera('jiocloud::openstack::nova_db_user')
+  $nova_db_password = hiera('jiocloud::openstack::nova_db_password')
+  $nova_db_name = hiera('jiocloud::openstack::nova_db_name')
 
-  $cinder_db_user = hiera('jiocloud::openstack::cinder_db_user','cinder')
-  $cinder_db_password = hiera('jiocloud::openstack::cinder_db_password','cinder@1234')
-  $cinder_db_name = hiera('jiocloud::openstack::cinder_db_name','cinder')
+  $cinder_db_user = hiera('jiocloud::openstack::cinder_db_user')
+  $cinder_db_password = hiera('jiocloud::openstack::cinder_db_password')
+  $cinder_db_name = hiera('jiocloud::openstack::cinder_db_name')
   
   ## Mysql environment defaults
   $os_dbs_hash  = {
@@ -99,9 +99,9 @@ class jiocloud::params {
   $db_host_ip		     	= hiera('jiocloud::db::db_host_ip')
   $mysql_server_package_name 	= hiera('jiocloud::db::mysql_server_package_name','mariadb-server')     # Server package to use
   $mysql_client_package_name 	= hiera('jiocloud::db::mysql_client_package_name','mariadb-client')     # Client Package to use 
-  $mysql_root_pass 		= hiera('jiocloud::db::mysql_root_pass','ril')                 #mysql root password to set
-  $mysql_datadir 		= hiera('jiocloud::db::mysql_datadir','/data')               # mysql data directory
-  $mysql_max_connections 	= hiera('jiocloud::db::mysql_max_connections',1024)                  # maximum connections
+  $mysql_root_pass 		= hiera('jiocloud::db::mysql_root_pass')                 #mysql root password to set
+  $mysql_datadir 		= hiera('jiocloud::db::mysql_datadir')               # mysql data directory
+  $mysql_max_connections 	= hiera('jiocloud::db::mysql_max_connections')                  # maximum connections
   $os_dbs			= hiera('jiocloud::db::os_dbs',$os_dbs_hash)
   $other_dbs			= hiera('jiocloud::db::other_dbs',undef) 
   $mysql_data_disk		= hiera('jiocloud::db::mysql_data_disk',undef)
@@ -181,9 +181,9 @@ class jiocloud::params {
     $ceph_radosgw_port  = 8143
   }
   
-  $compute_nodes           = hiera('jiocloud::compute_nodes','cp')
-  $storage_nodes           = hiera('jiocloud::storage_nodes','st')
-  $contrail_nodes          = hiera('jiocloud::contrail_nodes','ct')
+  $compute_nodes           = hiera('jiocloud::openstack::compute_nodes','cp')
+  $storage_nodes           = hiera('jiocloud::openstack::storage_nodes','st')
+  $contrail_nodes          = hiera('jiocloud::openstack::contrail_nodes','ct')
   $os_controller_nodes	   = hiera('jiocloud::openstack::controller_nodes')
 
   ## Apache configs for openstack controller application reverse proxy 
@@ -217,10 +217,10 @@ class jiocloud::params {
 ## Keystone admin, tenant details
   $admin_password = hiera('jiocloud::openstack::admin_password')	# Keystone Admin user password
   $admin_token = hiera('jiocloud::openstack::admin_token')	# keystone admin token
-  $admin_email = hiera('jiocloud::openstack::admin_email','cloud.devops@ril.com') #Keystone Admin user password
+  $admin_email = hiera('jiocloud::openstack::admin_email') #Keystone Admin user password
   $service_user_password = hiera('jiocloud::openstack::service_user_password')	# Service user password, this is used by all service users like neutron, nova, glance etc.
   $service_tenant = hiera('jiocloud::openstack::service_tenant','services')	# Service tenant
-  $region = hiera('jiocloud::openstack::region','RegionOne')	# Keystone region
+  $region = hiera('jiocloud::openstack::region')	# Keystone region
 
 ## End Keystone admin, tenant 
 
@@ -233,7 +233,7 @@ class jiocloud::params {
   ## End: Keystone Cache
 
 
-  $keystone_accepted_roles = hiera('jiocloud::openstack::keystone_accepted_roles','Member, admin, swiftoperator,_member_')
+  $keystone_accepted_roles = hiera('jiocloud::openstack::keystone_accepted_roles')
   $keystone_token_cache_size = hiera('jiocloud::openstack::keystone_token_cache_size',500)
 #  $keystone_node = hiera('jiocloud::openstack::keystone_node','t2')
   $keystone_token_format = hiera('jiocloud::openstack::keystone_token_format','uuid')
@@ -241,9 +241,9 @@ class jiocloud::params {
   $keystone_internal_address = hiera('jiocloud::openstack::keystone_internal_address',$keystone_public_address)
   $keystone_admin_address = hiera('jiocloud::openstack::keystone_admin_address',$keystone_internal_address)
   #$keystone_public_port = hiera('jiocloud::openstack::keystone_public_port',$keystone_port)
-  $keystone_admin_port = hiera('jiocloud::openstack::keystone_admin_port',35357)
+  $keystone_admin_port = hiera('jiocloud::openstack::keystone_admin_port')
   $keystone_protocol = $http_protocol
-  $keystone_version  = hiera('jiocloud::openstack::keystone_version','v2.0')
+  $keystone_version  = hiera('jiocloud::openstack::keystone_version')
 
   
   $keystone_public_url          = "$keystone_protocol://${keystone_public_address}:${keystone_port}/${keystone_version}"
@@ -288,10 +288,10 @@ class jiocloud::params {
 
 ## nova.conf entries
   
-  $nova_neutron_metadata_proxy_shared_secret    = hiera('jiocloud::openstack::nova_neutron_metadata_proxy_shared_secret','0ef66574-5b70-4be5-ab98-384809024f9e')
+  $nova_neutron_metadata_proxy_shared_secret    = hiera('jiocloud::openstack::nova_neutron_metadata_proxy_shared_secret')
   $nova_workers = hiera('jiocloud::openstack::nova_workers',2)
-  $neutron_libvirt_vif_driver = hiera('jiocloud::openstack::neutron_libvirt_vif_driver','contrail_vif.contrailvif.VRouterVIFDriver')
-  $nova_rpc_backend = hiera('jiocloud::openstack::nova_rpc_backend','nova.rpc.impl_zmq')
+  $neutron_libvirt_vif_driver = hiera('jiocloud::openstack::neutron_libvirt_vif_driver')
+  $nova_rpc_backend = hiera('jiocloud::openstack::nova_rpc_backend')
 
   $nova_glance_api_servers      = "$glance_protocol://$glance_public_address:$glance_port"
   $rpc_zmq_ipc_dir              = hiera('jiocloud::openstack::rpc_zmq_ipc_dir','/var/run/openstack')
@@ -307,7 +307,7 @@ class jiocloud::params {
 
   $cinder_volume_rbd_pool = hiera('jiocloud::openstack::cinder_volume_rbd_pool','volumes')
   $cinder_volume_rbd_user = hiera('jiocloud::openstack::cinder_volume_rbd_user','cinder_volume')
-  $cinder_rbd_secret_uuid = hiera('jiocloud::openstack::cinder_rbd_secret_uuid','f754bfa3-97bd-4673-bf0d-531eeb57af4f')
+  $cinder_rbd_secret_uuid = hiera('jiocloud::openstack::cinder_rbd_secret_uuid')
 
   $nova_api_nodes = hiera('jiocloud::openstack::nova_api_nodes',$os_controller_nodes)
   $nova_cert_nodes = hiera('jiocloud::openstack::nova_cert_nodes',$os_controller_nodes)
@@ -469,12 +469,12 @@ if $iam_compute_node {
         $contrail_vrouter_nw_first_ip   = $contrail_vrouter_nw_last_oct + 1
         $contrail_vrouter_gw = "${contrail_vrouter_nw_first_three}.${contrail_vrouter_nw_first_ip}"
         $contrail_vrouter_cidr = inline_template("<%= scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
-         $contrail_discovery_server    = hiera('jiocloud::contrail::discovery::server','10.1.0.16')
+         $contrail_discovery_server    = hiera('jiocloud::contrail::discovery::server')
          $contrail_vrouter_num_controllers = hiera('jiocloud::contrail::vrouter_num_controller',2)         # Number of controllers the vrouter can connect - 1 or 2
          $contrail_vrouter_mac         = inline_template("<%= scope.lookupvar('macaddress_' + @vrouter_interface) %>")
 #FIXME: This array to be implemented
          $contrail_static_route_vhost0 = hiera('jiocloud::contrail::static_route_vhost0')
-         $contrail_edge_router_address          = hiera('jiocloud::contrail::edge_router_addr','10.204.84.26')
+         $contrail_edge_router_address          = hiera('jiocloud::contrail::edge_router_addr')
      } else {
         $contrail_vrouter_interface = $compute_fe_interface
         $contrail_vrouter_ip          = inline_template("<%= scope.lookupvar('ipaddress_' + @contrail_vrouter_interface) %>")
@@ -488,12 +488,12 @@ if $iam_compute_node {
           $contrail_vrouter_cidr = inline_template("<%= scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\1') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\2') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\3') .to_i.to_s(2).scan(/1/).size + scope.lookupvar('netmask_' + @contrail_vrouter_interface).sub(/(\d+)\.(\d+)\.(\d+)\.(\d+)/,'\4') .to_i.to_s(2).scan(/1/).size  %>")
           $contrail_vrouter_mac         = inline_template("<%= scope.lookupvar('macaddress_' + @contrail_vrouter_interface) %>")
          }
-         $contrail_discovery_server    = hiera('jiocloud::contrail::discovery::server','10.1.0.16')
+         $contrail_discovery_server    = hiera('jiocloud::contrail::discovery::server')
          $contrail_vrouter_num_controllers = hiera('jiocloud::contrail::vrouter_num_controller',2)         # Number of controllers the vrouter can connect - 1 or 2
 
 #FIXME: This array to be implemented
          $contrail_static_route_vhost0 = hiera('jiocloud::contrail::static_route_vhost0')
-         $contrail_edge_router_address          = hiera('jiocloud::contrail::edge_router_addr','10.204.84.26')
+         $contrail_edge_router_address          = hiera('jiocloud::contrail::edge_router_addr')
     }
 
 
