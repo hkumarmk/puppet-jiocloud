@@ -414,6 +414,11 @@ class jiocloud::params {
   if (is_array($compute_nodes) and $hostname in $compute_nodes)  or ($compute_nodes and $compute_nodes == $host_prefix) {
     $iam_compute_node = true
   }
+
+  if (is_array($contrail_nodes) and $hostname in $contrail_nodes)  or ($contrail_nodes and $contrail_nodes == $host_prefix) {
+    $iam_contrail_node = true
+  }
+
   if (is_array($os_controller_nodes) and $hostname in $os_controller_nodes)  or ($os_controller_nodes and $os_controller_nodes == $host_prefix) {
     $iam_os_controller_node = true
   }
