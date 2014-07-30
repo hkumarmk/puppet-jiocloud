@@ -30,7 +30,7 @@ class jiocloud {
     }
   }
   
-  if $jiocloud::params::iam_compute_node {
+  if $jiocloud::params::iam_compute_node or $jiocloud::params::iam_contrail_node {
     class {'jiocloud::contrail':}
   }
 ## setup ceph 
