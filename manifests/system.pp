@@ -22,6 +22,10 @@ class jiocloud::system {
   class {'jiocloud::system::stage1':
     stage => 'init',
   }
+  ## Run os upgrade 
+  class {'jiocloud::system::os_upgrade':
+    stage => 'intermediate',
+  }  
   ## Run stage2 of system configuration
   class {'jiocloud::system::stage2': }
 

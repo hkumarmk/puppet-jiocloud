@@ -1,6 +1,9 @@
 class jiocloud {
 ### Define stages
   stage { 'init':
+    before => Stage['intermediate'],
+  }
+  stage { 'intermediate': 
     before => Stage['main'],
   }
   stage { 'finish': }
@@ -10,6 +13,7 @@ class jiocloud {
 ## Load params
   class {'jiocloud::params':}
   Exec { path => $jiocloud::params::executable_path }
+
 ## system ops
   class {'jiocloud::system':}
 ## DB server and client setup
