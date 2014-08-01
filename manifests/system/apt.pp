@@ -2,7 +2,7 @@ class jiocloud::system::apt (
   $ip_array = $jiocloud::params::ip_array,
   $local_repo_ip = $jiocloud::params::local_repo_ip,
   $apt_sources = $jiocloud::params::apt_sources,
-  $my_environment = $jiocloud::params::my_environment,
+  $active_apt_sources = $jiocloud::params::active_apt_sources,
 
 ) {
   class { '::apt':
@@ -21,7 +21,7 @@ class jiocloud::system::apt (
     class { '::apt::mirror':}
   }
 
-  create_resources(apt_source,$apt_sources, {local_repo_ip => $local_repo_ip, ip_array => $ip_array, my_environment => $my_environment} )
+  create_resources(apt_source,$apt_sources, {local_repo_ip => $local_repo_ip, ip_array => $ip_array, active_apt_sources => $active_apt_sources} )
 
   define apt_source (
     $location,
@@ -32,10 +32,10 @@ class jiocloud::system::apt (
     $architecture = 'amd64',
     $release	= 'precise',
     $mirror_url  = 'UNDEF',
-    $my_environment = undef,
-    $environment = ['production','staging','virtualcloud'],
+    $active_apt_sources = undef,
+    #$environment = ['production','staging','virtualcloud'],
   ) {
-    if downcase($my_environment) in downcase($environment) {
+    if member($active_apt_sources,$name) {
       ::apt::source { $name:
 	location   => $location,
 	repos      => $repos,

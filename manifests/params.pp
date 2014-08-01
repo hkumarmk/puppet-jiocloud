@@ -21,8 +21,6 @@ class jiocloud::params {
   $hostname_lc	= downcase($hostname)
 
   
-  ## Environment
-  $my_environment = hiera('jiocloud::my_environment','production')
 ### base system environment
 
   ## Base system config 
@@ -69,7 +67,9 @@ class jiocloud::params {
 ## Apt configs
   $local_repo_ip = hiera('jiocloud::system::local_repo_ip')
   $apt_sources = hiera('jiocloud::system::apt_sources',undef)
-
+  $default_active_apt_sources = hiera('jiocloud::system::default_active_apt_sources')
+  $extra_active_apt_sources = hiera('jiocloud::system::extra_active_apt_sources',undef)
+  $active_apt_sources = split(inline_template("<%= (@default_active_apt_sources + @extra_active_apt_sources).join(',') %>"),',')
 
 
   $keystone_db_user = hiera('jiocloud::openstack::keystone_db_user')
