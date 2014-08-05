@@ -1,5 +1,7 @@
 ##
-class jiocloud::system::os_upgrade {
+class jiocloud::system::os_upgrade (
+  $autoreboot = $jiocloud::params::autoreboot,
+) {
   ## Update release version  
   file { '/etc/jiocloud-release':
     ensure => file,
@@ -15,6 +17,16 @@ class jiocloud::system::os_upgrade {
     logoutput => true,
     environment => 'DEBIAN_FRONTEND=noninteractive',
     onlyif => 'apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --no-act upgrade  | grep "[1-9][0-9]* *upgraded,"',
+  }
+
+
+  ## Reboot the system if required
+  if $autoreboot {
+    exec {'os_reboot':
+      command => 'reboot',
+      logoutput => true,
+      onlyif => 'grep System.restart.required /var/run/reboot-required',
+    }
   }
 }
 
