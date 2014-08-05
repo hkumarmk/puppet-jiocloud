@@ -132,13 +132,15 @@ class jiocloud::openstack::nova::compute (
       --name=mon. \
       --add-key='${ceph_mon_key}' \
       --cap mon 'allow *' && virsh secret-set-value --secret $cinder_rbd_secret_uuid --base64 $(ceph --name mon. --keyring /tmp/.exec_add_ceph_auth_admin_${cinder_rbd_secret_uuid}.tmp \
-      auth get-or-create-key client.cinder_volume) && rm -f /tmp/.exec_add_ceph_auth_admin_${cinder_rbd_secret_uuid}.tmp",
+      auth get-or-create-key client.cinder_volume mon 'allow r' \
+          osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images' ) && rm -f /tmp/.exec_add_ceph_auth_admin_${cinder_rbd_secret_uuid}.tmp",
     unless => "ceph-authtool /tmp/.exec_add_ceph_auth_test_${cinder_rbd_secret_uuid}.tmp \
       --create-keyring \
       --name=mon. \
       --add-key='${ceph_mon_key}' \
       --cap mon 'allow *' && ceph --name mon. --keyring /tmp/.exec_add_ceph_auth_test_${cinder_rbd_secret_uuid}.tmp \
-      auth get-or-create-key client.cinder_volume |grep '$(virsh -q secret-get-value $cinder_rbd_secret_uuid)'",
+      auth get-or-create-key client.cinder_volume mon 'allow r' \
+          osd 'allow class-read object_prefix rbd_children, allow rwx pool=volumes, allow rx pool=images' |grep '$(virsh -q secret-get-value $cinder_rbd_secret_uuid)'",
     require => Exec["secret_define_cinder_volume"],
     notify => Service ['libvirt'],
   }
