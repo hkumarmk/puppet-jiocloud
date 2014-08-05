@@ -17,6 +17,7 @@ class jiocloud::system::stage1 (
   $sudo_users = $jiocloud::params::sudo_users,
   $local_users = $jiocloud::params::local_users,
   $all_nodes_pkgs_to_install = $jiocloud::params::all_nodes_pkgs_to_install,
+  $iam_contrail_node = $jiocloud::params::iam_contrail_node,
 )  {
 
   ### Set resolv.conf
@@ -40,9 +41,12 @@ class jiocloud::system::stage1 (
     root_password => $root_password,
   }
 
-  ## Apt source and mirror setup
-  class { 'jiocloud::system::apt': 
-    require => Resolv_conf['resolv_mu'],
+  ## Apt source and mirror setup on non-contrail node
+  ## FIXME: Need some changes in contrail packageing before we can have all packages there in contrail node
+  unless $iam_contrail_node {
+    class { 'jiocloud::system::apt': 
+      require => Resolv_conf['resolv_mu'],
+    }
   }
 
 }
