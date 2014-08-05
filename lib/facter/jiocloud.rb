@@ -7,8 +7,8 @@ if default_route_row =~ /^(\d+\.\d+\.\d+\.\d+)\s*([\w\d]+)$/
   Facter.add("default_gw_if") { setcode { default_gw_if } }
   Facter.add("default_gw_ip") { setcode { default_gw_ip } }
 end
-jiocloud_release = Facter::Util::Resolution.exec('cat /etc/jiocloud-release').chomp
-Facter.add("jiocloud_release") { setcode { jiocloud_release } }
+jiocloud_release = Facter::Util::Resolution.exec('cat /etc/jiocloud-release')
+Facter.add("jiocloud_release") { setcode { jiocloud_release.chomp } }
 
 networks_production = Array["10.135.120.0/24","10.135.121.0/24","10.135.112.0/24","10.135.122.0/24","10.135.123.0/24"]
 networks_staging = Array["10.135.123.0/24"]
