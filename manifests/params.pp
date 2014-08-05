@@ -49,7 +49,7 @@ class jiocloud::params {
   ## END resolv.conf:
 
   ###dns cname: Required to setup function based cname in dns 
-  $manage_hostname = hiera('jiocloud::system::manage_hostname',false)
+  $manage_hostname = hiera('jiocloud::system::manage_hostname',true)
   $update_dns	= hiera('jiocloud::system::update_dns',false)
   $dns_master_server = hiera('jiocloud::system::dns_master_server')
   $dnsupdate_key = hiera('jiocloud::system::dnsupdate_key')
@@ -465,6 +465,7 @@ if $iam_compute_node {
   $ceph_cluster_address         = inline_template("<%= scope.lookupvar('ipaddress_' + @ceph_storage_cluster_interface) %>")
 
   $vrouter_physical_interface = $compute_fe_interface
+  $configure_contrail_node = hiera('jiocloud::contrail::configure_contrail_node',false)
   if 'vhost0' in $interfaces_array {
         $vrouter_interface = vhost0
         $contrail_vrouter_ip          = $ipaddress_vhost0

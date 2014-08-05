@@ -2,7 +2,7 @@
 class jiocloud::contrail (
 ) inherits jiocloud::params {
   ## Setup contrail controller components on contrail_node
-  if $iam_contrail_node {
+  if $iam_contrail_node and $configure_contrail_node {
     ## install contrail-install (repo) package and other base packages
     class {'::contrail::install':
       contrail_repo_type => 'contrail-ubuntu-package'
