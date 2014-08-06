@@ -1,10 +1,7 @@
 ## Class: jiocloud::openstack::apache
 class jiocloud::openstack::apache (
-  $ssl_cert_file_source = $jiocloud::params::ssl_cert_file_source,
   $ssl_cert_file = $jiocloud::params::ssl_cert_file,
-  $ssl_key_file_source = $jiocloud::params::ssl_key_file_source,
   $ssl_key_file = $jiocloud::params::ssl_key_file,
-  $ssl_ca_file_source = $jiocloud::params::ssl_ca_file_source,
   $ssl_ca_file = $jiocloud::params::ssl_ca_file,
   $nova_port_to_apache = $jiocloud::params::nova_port_to_apache,
   $ssl_enabled = $jiocloud::params::ssl_enabled,
