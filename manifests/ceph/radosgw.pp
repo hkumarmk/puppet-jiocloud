@@ -18,13 +18,11 @@ class jiocloud::ceph::radosgw (
   $radosgw_admin_address = $jiocloud::params::ceph_radosgw_admin_address,
   $radosgw_internal_address = $jiocloud::params::ceph_radosgw_internal_address,
   $ceph_radosgw_listen_ssl = $jiocloud::params::ceph_radosgw_listen_ssl,
-  $ssl_cert_file_source = $jiocloud::params::ssl_cert_file_source,
   $ssl_cert_file = $jiocloud::params::ssl_cert_file,
   $ssl_key_file = $jiocloud::params::ssl_key_file,
-  $ssl_key_file_source = $jiocloud::params::ssl_key_file_source,
   $ssl_ca_file = $jiocloud::params::ssl_ca_file,
-  $ssl_ca_file_source = $jiocloud::params::ssl_ca_file_source,
   $ceph_radosgw_apache_version = $jiocloud::params::ceph_radosgw_apache_version,
+  $jiocloud_ssl_cert_package_version = $jiocloud::params::jiocloud_ssl_cert_package_version,
 ) {
   file {'/etc/apache2/certs/':
     ensure => directory,
@@ -46,13 +44,13 @@ class jiocloud::ceph::radosgw (
     admin_address		=> $radosgw_admin_address,
     internal_address	=> $radosgw_internal_address,
     listen_ssl		=> $ceph_radosgw_listen_ssl,
-    radosgw_cert_file_source	=> $ssl_cert_file_source,
     radosgw_cert_file	=> $ssl_cert_file,
     radosgw_key_file	=> $ssl_key_file,
-    radosgw_key_file_source	=> $ssl_key_file_source,
-    radosgw_ca_file		=> $ssl_ca_file,
-    radosgw_ca_file_source	=> $ssl_ca_file_source,
-    radosgw_apache_version	=> $ceph_radosgw_apache_version,
+    radosgw_ca_file	=> $ssl_ca_file,
+    require 		=> Package['jiocloud-ssl-certificate'],
+  }
+  package { 'jiocloud-ssl-certificate':
+    ensure => $jiocloud_ssl_cert_package_version,
   }
 
 
