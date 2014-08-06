@@ -3,7 +3,7 @@ class jiocloud::system::operatingsystem_upgrade (
   $autoreboot = $jiocloud::params::autoreboot,
 ) {
   ## Set a factor $no_operatingsystem_upgrade, to avoid operating system upgrade on the node.
-  unless $no_operatingsystem_upgrade {
+  unless $no_operatingsystem_upgrade == 1 {
     ## Update release version  
     file { '/etc/jiocloud-release':
       ensure => file,
