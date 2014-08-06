@@ -8,6 +8,7 @@ class jiocloud::openstack::apache (
   $ssl_ca_file = $jiocloud::params::ssl_ca_file,
   $nova_port_to_apache = $jiocloud::params::nova_port_to_apache,
   $ssl_enabled = $jiocloud::params::ssl_enabled,
+  $jiocloud_ssl_cert_package_version = $jiocloud::params::jiocloud_ssl_cert_package_version,
 ) {
 
   if $ssl_enabled {
@@ -18,6 +19,7 @@ class jiocloud::openstack::apache (
       default_ssl_key => $ssl_key_file,
       default_vhost => false,
       apache_version => '2.4',
+      require => Package['jiocloud-ssl-certificate'],
     }
     include ::apache::mod::wsgi
     include apache::mod::rewrite
@@ -26,6 +28,9 @@ class jiocloud::openstack::apache (
     include apache::mod::proxy_http
     ## this is required to proxy novncproxy
     ::apache::mod { 'proxy_wstunnel': }	
+    package { 'jiocloud-ssl-certificate':
+      ensure => $jiocloud_ssl_cert_package_version,
+    }
   } else {
     class {'::apache':
       server_signature => 'Off',
@@ -37,45 +42,5 @@ class jiocloud::openstack::apache (
     include apache::mod::proxy_http
   } 
 
-  file { '/etc/apache2/certs':
-    ensure	=> directory,
-    owner   => www-data,
-    group   => www-data,
-  }
-
-
-  if  $ssl_cert_file_source != undef {
-    file { $ssl_cert_file:
-      ensure        => file,
-      owner         => www-data,
-      group         => www-data,
-      mode          => 640,
-      source        => $ssl_cert_file_source,
-      notify  => Service['httpd'],
-    }
-  }
-
-  if  $ssl_key_file_source != undef {
-    file { $ssl_key_file:
-      ensure        => file,
-      owner         => www-data,
-      group         => www-data,
-      mode          => 640,
-      source        => $ssl_key_file_source,
-      notify  => Service['httpd'],
-    }
-  }
-
-  
-  if  $ssl_ca_file_source != undef {
-    file { $ssl_ca_file:
-      ensure          => file,
-      owner           => www-data,
-      group           => www-data,
-      mode            => 640,
-      source          => $ssl_ca_file_source,
-      notify  => Service['httpd'],
-    }
-  }
 
 }

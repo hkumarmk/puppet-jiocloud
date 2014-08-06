@@ -11,6 +11,7 @@ class jiocloud::params {
   $ssl_key_file_source 	= "puppet:///modules/jiocloud/ssl/jiocloud.com.key"
   $ssl_ca_file         	= '/etc/apache2/certs/gd_bundle-g2-g1.crt'
   $ssl_ca_file_source  	= "puppet:///modules/jiocloud/ssl/gd_bundle-g2-g1.crt"
+  $jiocloud_ssl_cert_package_version = hiera('jiocloud::ssl::cert_package_version')
   $vrouter_file         	= "/lib/modules/$kernelrelease/extra/net/vrouter/vrouter.ko"
   $vrouter_file_source  	= "puppet:///modules/jiocloud/openstack/compute/_lib_modules_${kernelrelease}_extra_net_vrouter_vrouter.ko"
   $interfaces_array = split($interfaces,',')
