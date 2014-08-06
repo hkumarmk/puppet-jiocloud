@@ -1,0 +1,17 @@
+{
+  "name": "puppet-jiocloud",
+  "version": "0.1.0",
+  "author": "Harish Kumar <hkumarmk@gmail.com>",
+  "summary": "Setup Jiocloud public cloud infrastructure",
+  "license": "Apache 2.0",
+  "source": "https://github.com/jiocloud/puppet-jiocloud",
+  "project_page": "https://github.com/jiocloud/puppet-jiocloud",
+  "issues_url": "https://github.com/jiocloud/puppet-jiocloud/issues",
+  "dependencies": [
+    {
+      "version_range": ">= 1.0.0",
+      "name": "puppetlabs-stdlib"
+    }
+  ]
+}
+
