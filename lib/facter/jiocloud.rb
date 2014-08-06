@@ -9,4 +9,8 @@ if default_route_row =~ /^(\d+\.\d+\.\d+\.\d+)\s*([\w\d]+)$/
 end
 jiocloud_release = Facter::Util::Resolution.exec('cat /etc/jiocloud-release')
 Facter.add("jiocloud_release") { setcode { jiocloud_release.chomp } }
-
+Facter.add("iam_virtual") do
+    setcode do
+        Facter::Util::Resolution.exec("/usr/sbin/dmidecode | grep -ic Reliance.Jio").chomp
+    end
+end
