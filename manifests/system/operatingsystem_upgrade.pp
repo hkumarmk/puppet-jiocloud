@@ -25,7 +25,7 @@ class jiocloud::system::operatingsystem_upgrade (
     ## Reboot the system if required
     if $autoreboot {
       exec {'operatingsystem_reboot':
-        command => 'reboot',
+        command => 'reboot -f ; sleep 60',
         logoutput => true,
         onlyif => 'grep System.restart.required /var/run/reboot-required',
       }
