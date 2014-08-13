@@ -48,7 +48,7 @@ class jiocloud::openstack::dashboard () inherits jiocloud::params {
       default_vhost => true,
       port => 80,
       docroot => $os_apache_docroot,
-      logroot => '/var/log/horizon',
+      logroot => '/var/log/apache2',
       error_log_file => 'horizon.log',
       access_log_file => 'horizon.log',
       rewrites => [ { comment => "Rewrite http to https", rewrite_cond => ['%{HTTPS} off'], rewrite_rule => ['(.*) https://%{HTTP_HOST}%{REQUEST_URI}' ] } ],
@@ -61,7 +61,7 @@ class jiocloud::openstack::dashboard () inherits jiocloud::params {
       port => 443,
       ssl => true,
       docroot => $os_apache_docroot,
-      logroot => '/var/log/horizon',
+      logroot => '/var/log/apache2',
       error_log_file => 'horizon.log',
       access_log_file => 'horizon.log',
       aliases => [ {alias => '/static', path => '/usr/share/openstack-dashboard/openstack_dashboard/static/'} ],
@@ -85,7 +85,7 @@ class jiocloud::openstack::dashboard () inherits jiocloud::params {
       default_vhost => true,
       port => 80,
       docroot => '/var/www/',
-      logroot => '/var/log/horizon',
+      logroot => '/var/log/apache2',
       error_log_file => 'horizon.log',
       access_log_file => 'horizon.log',
       aliases => [ {alias => '/static', path => '/usr/share/openstack-dashboard/openstack_dashboard/static/'} ],
@@ -103,4 +103,12 @@ class jiocloud::openstack::dashboard () inherits jiocloud::params {
         },
     }
   }
+
+  ## Workaround for /var/log/horizon is not created (if create using apache::vhost, it is owned by root)
+  file {'/var/log/horizon':
+    ensure 	=> directory,
+    owner	=> $horizon_wsgi_daemon_user,
+    group	=> $horizon_wsgi_daemon_group,
+  }
+
 }
