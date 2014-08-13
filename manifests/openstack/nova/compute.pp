@@ -18,7 +18,7 @@ class jiocloud::openstack::nova::compute (
   $cinder_rbd_secret_uuid = $jiocloud::params::cinder_rbd_secret_uuid,
   $nova_db_url = $jiocloud::params::nova_db_url,
   $ceph_mon_key = $jiocloud::params::ceph_mon_key,
-) {
+) inherits jiocloud::params {
   package { 'ceph-common':
     ensure  => 'installed',
   }
