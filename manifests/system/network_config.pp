@@ -17,9 +17,11 @@ class jiocloud::system::network_config (
   $contrail_vrouter_netmask = $jiocloud::params::contrail_vrouter_netmask,
   $contrail_vrouter_ip = $jiocloud::params::contrail_vrouter_ip,
   $contrail_vrouter_gw = $jiocloud::params::contrail_vrouter_gw,
-
 )  {
   $vm_hosted_node = inline_template('<% @mgmt_vms.each do | key, val | val.each do | k,v | if v == @hostname %> <%= "vm_hosted" %> <% end %> <% end %> <% end %>')
+  $ifs_arr = delete(split($interfaces,","),'lo')
+  $ifs_count = count($ifs_arr)
+
     if is_array($compute_nodes) and $hostname in $compute_nodes  or $compute_nodes and $compute_nodes == $host_prefix {
       if $vm_hosted_node =~ /vm_hosted/ and $contrail_vrouter_ip {
 	class { "network::interfaces":
@@ -111,19 +113,33 @@ class jiocloud::system::network_config (
 	  },
 	  auto => ["eth0"],
 	}
-      } else {		    
-	class { "network::interfaces":
-	  interfaces => {
-	    "$compute_be_interface" => {
-	      "method" => "dhcp",
-	    },
-	    "$compute_fe_interface" => {
-	      "method" => "dhcp",
-	    },
-	  },
-	  auto => [$compute_be_interface,$compute_fe_interface],
-	}
+
+    } elsif $ifs_count == 2 {
+      $if0 = inline_template("<%= @ifs_arr[0] %>") 
+      $if1 = inline_template("<%= @ifs_arr[1] %>")
+
+      class { "network::interfaces":
+          interfaces => {
+            "$if0" => {
+              "method" => "dhcp",
+            },
+            "$if1" => {
+              "method" => "dhcp",
+            },
+          },
+          auto => $ifs_arr,
+        }
+      } elsif $ifs_count == 1 {
+      class { "network::interfaces":
+          interfaces => {
+            "$ifs_arr" => {
+              "method" => "dhcp",
+            },
+          },
+          auto => $ifs_arr,
+        }
       }
 
     }
 }
+
